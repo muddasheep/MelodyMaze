@@ -1,0 +1,16 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\GameEntity.cs">
+    <Files>
+      <File FileName="Assets\scripts\GameEntity.cs" Line="477" Column="1" />
+      <File FileName="Assets\scripts\maze_field_script.cs" Line="43" Column="34" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="C:\Users\muddasheep\Documents\Maze Melody\Assets\scripts\GameEntity.cs" line="503" />
+      <Breakpoint file="C:\Users\muddasheep\Documents\Maze Melody\Assets\scripts\GameEntity.cs" line="476" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
