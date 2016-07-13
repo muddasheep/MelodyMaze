@@ -140,22 +140,22 @@ public class GameEntity : MonoBehaviour {
 				else {
 					if (maze_wave_radius_counter < 14) {
 						// wave_counter increases: every time, start to make bigger "rectangle" and add objects to wave_animator
-						int wave_start_x = 7 - maze_wave_radius_counter;
-						int wave_start_y = 4 - maze_wave_radius_counter;
-						int wave_end_x = 7 + maze_wave_radius_counter;
-						int wave_end_y = 4 + maze_wave_radius_counter;
+						int wave_start_x = 0 - maze_wave_radius_counter;
+						int wave_start_y = 0 - maze_wave_radius_counter;
+						int wave_end_x = 0 + maze_wave_radius_counter;
+						int wave_end_y = 0 + maze_wave_radius_counter;
 
-						if (wave_start_x < 0) {
-							wave_start_x = 0;
+						if (wave_start_x < -8) {
+							wave_start_x = -8;
 						}
-						if (wave_start_y < 0) {
-							wave_start_y = 0;
+						if (wave_start_y < -9) {
+							wave_start_y = -9;
 						}
-						if (wave_end_x > 14) {
-							wave_end_x = 14;
+						if (wave_end_x > 8) {
+							wave_end_x = 8;
 						}
-						if (wave_end_y > 8) {
-							wave_end_y = 8;
+						if (wave_end_y > 9) {
+							wave_end_y = 9;
 						}
 
 						int wave_counter_x = wave_start_x;
@@ -185,7 +185,6 @@ public class GameEntity : MonoBehaviour {
 			}
 		}
 		else {
-			// TODO: check when done if notes are a) on top of each other b) on player start and if so, destroy_maze() and rebuild
 
 			build_maze();
 
@@ -281,20 +280,42 @@ public class GameEntity : MonoBehaviour {
 		
 		// draw corners
 		if (maze_initialized == 4) {
-			int row_count = 0;
-			int col_count = 0;
 
-			//draw_maze_tunnel(col_count % 4, -5, -5, 30);
+			// figure out boundaries of maze
+			int lowest_x = 0;
+			int lowest_y = 0;
+			int highest_x = 0;
+			int highest_y = 0;
 
-			/*while (row_count < 9) {
-				while (col_count < 15) {
+			foreach (KeyValuePair<int,GameObject> field in maze_field_coordinates_hash) {
+				maze_field_script field_script = get_maze_field_script_from_game_object(field.Value);
+
+				if (field_script.coord_x < lowest_x) {
+					lowest_x = field_script.coord_x;
+				}
+				if (field_script.coord_y < lowest_y) {
+					lowest_y = field_script.coord_y;
+				}
+				if (field_script.coord_x > highest_x) {
+					highest_x = field_script.coord_x;
+				}
+				if (field_script.coord_y > highest_y) {
+					highest_y = field_script.coord_y;
+				}
+			}
+
+			int row_count = lowest_y;
+			int col_count = lowest_x;
+
+			while (row_count <= highest_y) {
+				while (col_count <= highest_x) {
 					draw_maze_tunnel(col_count % 4, col_count, row_count, 30);
 					col_count++;
 				}
 				
-				col_count = 0;
+				col_count = lowest_x;
 				row_count++;
-			}*/
+			}
 			maze_initialized++;
 		}
 	}
@@ -453,8 +474,6 @@ public class GameEntity : MonoBehaviour {
 		int counter = 0;
 		int insanity_counter = 0;
 
-		Debug.Log("========================= drawing maze tunnel ===========================");
-
 		// make a theoretical array of coordinates
 
 		while (counter < steps && insanity_counter < 50) {
@@ -475,13 +494,8 @@ public class GameEntity : MonoBehaviour {
 				current_direction = choose_random_direction_with_exceptions(new int[] { current_direction, avoid_direction });
 
 				insanity_counter++;
-				//tunnel_saved_path_coordinates.Clear();
-				//counter = 0;
-				//start_x = initial_x;
-				//start_y = initial_y;
 				start_x = temp_x;
 				start_y = temp_y;
-				Debug.Log ("RESET!");
 				continue;
 			}
 
