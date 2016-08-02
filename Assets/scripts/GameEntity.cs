@@ -8,6 +8,8 @@ public class GameEntity : MonoBehaviour {
 	public GameObject maze_field;
 	public GameObject maze_note;
 	public GameObject redrawing_field;
+	public GameObject base_note;
+	public Camera maze_cam;
 
 	List<GameObject> maze_field_coordinates = new List<GameObject>();
 	Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
@@ -16,7 +18,8 @@ public class GameEntity : MonoBehaviour {
 	int collected_notes = 0;
 
 	int maze_initialized = 0;
-	bool maze_has_failed_to_construct = false;
+	bool base_note_reached_center = false;
+	GameObject base_note_ingame;
 	bool maze_deconstruction = false;
 	int maze_path_redraw_rate_counter = 0;
 	int maze_wave_radius_counter = 0;
@@ -108,93 +111,119 @@ public class GameEntity : MonoBehaviour {
 	void Update () {
 
 		if (maze_deconstruction == true) {
-			if (player_saved_paths.Count > 0) {
-				if (maze_path_redraw_rate_counter < 2) {
-					maze_path_redraw_rate_counter++;
-				}
-				else {
-					// redraw paths
-					List<TakenPaths> player_saved_paths_altered = new List<TakenPaths>();
-
-					foreach (TakenPaths path in player_saved_paths) {
-						if (path.redrawn_counter < path.taken_path.Count) {
-							TakenPath current_path = path.taken_path[ path.redrawn_counter ];
-
-							GameObject redrawing_maze_field = find_or_create_field_at_coordinates(current_path.coord_x, current_path.coord_y);
-							
-							GameObject redrawn_field = (GameObject)Instantiate(redrawing_field, new Vector3(redrawing_maze_field.transform.position.x, redrawing_maze_field.transform.position.y, redrawing_maze_field.transform.position.z - 1F), Quaternion.identity);
-							redrawn_field.transform.parent = redrawing_maze_field.transform;
-
-							path.redrawn_counter++;
-							player_saved_paths_altered.Add(path);
-						}
-					}
-					player_saved_paths = player_saved_paths_altered;
-					maze_path_redraw_rate_counter = 0;
-				}
-			}
-			else {
-				if (maze_path_redraw_rate_counter < 4) {
-					maze_path_redraw_rate_counter++;
-				}
-				else {
-					if (maze_wave_radius_counter < 14) {
-						// wave_counter increases: every time, start to make bigger "rectangle" and add objects to wave_animator
-						int wave_start_x = 0 - maze_wave_radius_counter;
-						int wave_start_y = 0 - maze_wave_radius_counter;
-						int wave_end_x = 0 + maze_wave_radius_counter;
-						int wave_end_y = 0 + maze_wave_radius_counter;
-
-						if (wave_start_x < -8) {
-							wave_start_x = -8;
-						}
-						if (wave_start_y < -9) {
-							wave_start_y = -9;
-						}
-						if (wave_end_x > 8) {
-							wave_end_x = 8;
-						}
-						if (wave_end_y > 9) {
-							wave_end_y = 9;
-						}
-
-						int wave_counter_x = wave_start_x;
-						int wave_counter_y = wave_start_y;
-
-						maze_destruction_animator = new List<GameObject>();
-
-						while(wave_counter_y <= wave_end_y) {
-							while(wave_counter_x <= wave_end_x) {
-								GameObject maze_field_target = find_or_create_field_at_coordinates(wave_counter_x, wave_counter_y);
-								maze_destruction_animator.Add(maze_field_target);
-
-								wave_counter_x++;
-							}
-
-							wave_counter_x = wave_start_x;
-							wave_counter_y++;
-						}
-
-						maze_wave_radius_counter++;
-					}
-
-					maze_path_redraw_rate_counter = 0;
-				}
-
-				animate_maze_destruction();
-			}
+			deconstruct_maze();
 		}
 		else {
 
 			build_maze();
 
 			// move player
-			if (player_spheres == 0) {
+			if (player_spheres == 0 && base_note_reached_center == true) {
 				spawn_player_sphere();
 			}
 			else {
+				check_base_note_reach_center();
 				player_movement();
+				adjust_camera();
 			}
+		}
+	}
+
+	void check_base_note_reach_center() {
+		if (!player_sphere) {
+			return;
+		}
+
+		if (player_coord_x == 0 && player_coord_y == 0 && player_sphere_moving == false) {
+
+			base_note_reached_center = true;
+			base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
+			next_base_note_script.set_up_base_camp();
+		}
+	}
+
+	void adjust_camera() {
+		if (!player_sphere) {
+			return;
+		}
+		maze_cam.transform.position = new Vector3(player_sphere.transform.position.x, player_sphere.transform.position.y, -30.8F);
+	}
+
+	void deconstruct_maze() {
+		if (player_saved_paths.Count > 0) {
+			if (maze_path_redraw_rate_counter < 2) {
+				maze_path_redraw_rate_counter++;
+			}
+			else {
+				// redraw paths
+				List<TakenPaths> player_saved_paths_altered = new List<TakenPaths>();
+				
+				foreach (TakenPaths path in player_saved_paths) {
+					if (path.redrawn_counter < path.taken_path.Count) {
+						TakenPath current_path = path.taken_path[ path.redrawn_counter ];
+						
+						GameObject redrawing_maze_field = find_or_create_field_at_coordinates(current_path.coord_x, current_path.coord_y);
+						
+						GameObject redrawn_field = (GameObject)Instantiate(redrawing_field, new Vector3(redrawing_maze_field.transform.position.x, redrawing_maze_field.transform.position.y, redrawing_maze_field.transform.position.z - 1F), Quaternion.identity);
+						redrawn_field.transform.parent = redrawing_maze_field.transform;
+						
+						path.redrawn_counter++;
+						player_saved_paths_altered.Add(path);
+					}
+				}
+				player_saved_paths = player_saved_paths_altered;
+				maze_path_redraw_rate_counter = 0;
+			}
+		}
+		else {
+			if (maze_path_redraw_rate_counter < 4) {
+				maze_path_redraw_rate_counter++;
+			}
+			else {
+				if (maze_wave_radius_counter < 14) {
+					// wave_counter increases: every time, start to make bigger "rectangle" and add objects to wave_animator
+					int wave_start_x = 0 - maze_wave_radius_counter;
+					int wave_start_y = 0 - maze_wave_radius_counter;
+					int wave_end_x = 0 + maze_wave_radius_counter;
+					int wave_end_y = 0 + maze_wave_radius_counter;
+					
+					if (wave_start_x < -8) {
+						wave_start_x = -8;
+					}
+					if (wave_start_y < -9) {
+						wave_start_y = -9;
+					}
+					if (wave_end_x > 8) {
+						wave_end_x = 8;
+					}
+					if (wave_end_y > 9) {
+						wave_end_y = 9;
+					}
+					
+					int wave_counter_x = wave_start_x;
+					int wave_counter_y = wave_start_y;
+					
+					maze_destruction_animator = new List<GameObject>();
+					
+					while(wave_counter_y <= wave_end_y) {
+						while(wave_counter_x <= wave_end_x) {
+							GameObject maze_field_target = find_or_create_field_at_coordinates(wave_counter_x, wave_counter_y);
+							maze_destruction_animator.Add(maze_field_target);
+							
+							wave_counter_x++;
+						}
+						
+						wave_counter_x = wave_start_x;
+						wave_counter_y++;
+					}
+					
+					maze_wave_radius_counter++;
+				}
+				
+				maze_path_redraw_rate_counter = 0;
+			}
+			
+			animate_maze_destruction();
 		}
 	}
 
@@ -307,20 +336,33 @@ public class GameEntity : MonoBehaviour {
 			int row_count = lowest_y;
 			int col_count = lowest_x;
 
+			GameObject last_created_tunnel = base_note;
+
 			while (row_count <= highest_y) {
 				while (col_count <= highest_x) {
-					draw_maze_tunnel(col_count % 4, col_count, row_count, 30);
+					last_created_tunnel = draw_maze_tunnel(col_count % 4, col_count, row_count, 30);
 					col_count++;
 				}
-				
+
 				col_count = lowest_x;
 				row_count++;
 			}
+
+			base_note_ingame = (GameObject)Instantiate(base_note, new Vector3(last_created_tunnel.transform.position.x, last_created_tunnel.transform.position.y, last_created_tunnel.transform.position.z - 1F), Quaternion.identity);
+			base_note_ingame.transform.Rotate(270F, 0F, 0F);
+			player_sphere = base_note_ingame;
+			player_coord_x = (int)last_created_tunnel.transform.position.x;
+			player_coord_y = (int)last_created_tunnel.transform.position.y;
+
 			maze_initialized++;
 		}
 	}
 
 	bool check_note_collection() {
+		if (base_note_reached_center == false) {
+			return false;
+		}
+
 		maze_field_script current_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
 		int check_coord_x = current_maze_field.coord_x;
 		int check_coord_y = current_maze_field.coord_y;
@@ -367,6 +409,11 @@ public class GameEntity : MonoBehaviour {
 		return next_maze_script;
 	}
 
+	base_note_script get_base_note_script_from_game_object(GameObject base_note_object) {
+		base_note_script next_base_script = (base_note_script)base_note_object.GetComponent(typeof(base_note_script));
+		return next_base_script;
+	}
+
 	maze_field_script get_maze_field_script(int coord_x, int coord_y) {
 		GameObject next_maze_field = find_or_create_field_at_coordinates(coord_x, coord_y);
 		maze_field_script next_maze_script = get_maze_field_script_from_game_object(next_maze_field);
@@ -375,6 +422,9 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	void player_movement() {
+		if (!player_sphere) {
+			return;
+		}
 		float player_z = player_sphere.transform.position.z;
 		
 		bool allow_movement = true;
@@ -441,7 +491,9 @@ public class GameEntity : MonoBehaviour {
 			}
 			
 			if (player_sphere_moving == true && direction_pressed == true) {
-				player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
+				if (base_note_reached_center == true) {
+					player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
+				}
 				player_target_position = new Vector3(player_coord_x, player_coord_y, player_z);
 			}
 		}
