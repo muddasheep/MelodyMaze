@@ -62,22 +62,26 @@ public class maze_field_script : MonoBehaviour {
 	}
 
 	public void remove_bottom() {
-		wall_bottom.transform.localPosition = new Vector3(wall_bottom.transform.localPosition.x, wall_bottom.transform.localPosition.y, 14.4F);
+		Destroy( wall_bottom );
+//		wall_bottom.transform.localPosition = new Vector3(wall_bottom.transform.localPosition.x, wall_bottom.transform.localPosition.y, 14.4F);
 		wall_bottom_removed = true;
 		removed_sides++;
 	}
 	public void remove_top() {
-		wall_top.transform.localPosition = new Vector3(wall_top.transform.localPosition.x, wall_top.transform.localPosition.y, 14.4F);
+		Destroy( wall_top );
+//		wall_top.transform.localPosition = new Vector3(wall_top.transform.localPosition.x, wall_top.transform.localPosition.y, 14.4F);
 		wall_top_removed = true;
 		removed_sides++;
 	}
 	public void remove_right() {
-		wall_right.transform.localPosition = new Vector3(wall_right.transform.localPosition.x, wall_right.transform.localPosition.y, 14.4F);
+		Destroy( wall_right );
+//		wall_right.transform.localPosition = new Vector3(wall_right.transform.localPosition.x, wall_right.transform.localPosition.y, 14.4F);
 		wall_right_removed = true;
 		removed_sides++;
 	}
 	public void remove_left() {
-		wall_left.transform.localPosition = new Vector3(wall_left.transform.localPosition.x, wall_left.transform.localPosition.y, 14.4F);
+		Destroy( wall_left );
+//		wall_left.transform.localPosition = new Vector3(wall_left.transform.localPosition.x, wall_left.transform.localPosition.y, 14.4F);
 		wall_left_removed = true;
 		removed_sides++;
 	}

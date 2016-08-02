@@ -124,7 +124,6 @@ public class GameEntity : MonoBehaviour {
 			else {
 				check_base_note_reach_center();
 				player_movement();
-				adjust_camera();
 			}
 		}
 	}
@@ -146,7 +145,7 @@ public class GameEntity : MonoBehaviour {
 		if (!player_sphere) {
 			return;
 		}
-		maze_cam.transform.position = new Vector3(player_sphere.transform.position.x, player_sphere.transform.position.y, -30.8F);
+		maze_cam.transform.position = new Vector3(player_sphere.transform.position.x, player_sphere.transform.position.y, -20.8F);
 	}
 
 	void deconstruct_maze() {
@@ -353,6 +352,7 @@ public class GameEntity : MonoBehaviour {
 			player_sphere = base_note_ingame;
 			player_coord_x = (int)last_created_tunnel.transform.position.x;
 			player_coord_y = (int)last_created_tunnel.transform.position.y;
+			adjust_camera();
 
 			maze_initialized++;
 		}
@@ -438,7 +438,8 @@ public class GameEntity : MonoBehaviour {
 			float distance = Vector3.Distance(new_position, player_target_position);
 			
 			allow_movement = false;
-			
+			adjust_camera();
+
 			if (distance < 0.1F) {
 				allow_movement = true;
 				note_collected = check_note_collection();
@@ -506,6 +507,7 @@ public class GameEntity : MonoBehaviour {
 		player_coord_x = 0;
 		player_coord_y = 0;
 		player_spheres++;
+		adjust_camera();
 	}
 
 	GameObject draw_maze_tunnel(int current_direction, int start_x, int start_y, int steps) {
