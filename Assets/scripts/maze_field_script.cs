@@ -20,7 +20,7 @@ public class maze_field_script : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		//Debug.Log("ADDING WALLS *_*");
-		wall_top = (GameObject)Instantiate(maze_wall, new Vector3(4.4F, -0.5F, -4.4F), Quaternion.identity);
+		/*wall_top = (GameObject)Instantiate(maze_wall, new Vector3(4.4F, -0.5F, -4.4F), Quaternion.identity);
 		wall_top.transform.parent = gameObject.transform;
 		wall_top.transform.localRotation = Quaternion.Euler (0, 0, -90F);
 		wall_top.transform.localPosition = new Vector3(0F, 0.5F, -4.4F);
@@ -33,7 +33,7 @@ public class maze_field_script : MonoBehaviour {
 		wall_left.transform.localPosition = new Vector3(-0.5F, 0F, -4.4F);
 		wall_right = (GameObject)Instantiate(maze_wall, new Vector3(0.5F, 0F, -4.4F), Quaternion.identity);
 		wall_right.transform.parent = gameObject.transform;
-		wall_right.transform.localPosition = new Vector3(0.5F, 0F, -4.4F);
+		wall_right.transform.localPosition = new Vector3(0.5F, 0F, -4.4F);*/
 	}
 	
 	// Update is called once per frame
@@ -62,26 +62,22 @@ public class maze_field_script : MonoBehaviour {
 	}
 
 	public void remove_bottom() {
-		Destroy( wall_bottom );
-//		wall_bottom.transform.localPosition = new Vector3(wall_bottom.transform.localPosition.x, wall_bottom.transform.localPosition.y, 14.4F);
+		//Destroy( wall_bottom );
 		wall_bottom_removed = true;
 		removed_sides++;
 	}
 	public void remove_top() {
-		Destroy( wall_top );
-//		wall_top.transform.localPosition = new Vector3(wall_top.transform.localPosition.x, wall_top.transform.localPosition.y, 14.4F);
+		//Destroy( wall_top );
 		wall_top_removed = true;
 		removed_sides++;
 	}
 	public void remove_right() {
-		Destroy( wall_right );
-//		wall_right.transform.localPosition = new Vector3(wall_right.transform.localPosition.x, wall_right.transform.localPosition.y, 14.4F);
+		//Destroy( wall_right );
 		wall_right_removed = true;
 		removed_sides++;
 	}
 	public void remove_left() {
-		Destroy( wall_left );
-//		wall_left.transform.localPosition = new Vector3(wall_left.transform.localPosition.x, wall_left.transform.localPosition.y, 14.4F);
+		//Destroy( wall_left );
 		wall_left_removed = true;
 		removed_sides++;
 	}

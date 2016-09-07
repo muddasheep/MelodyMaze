@@ -6,6 +6,7 @@ public class GameEntity : MonoBehaviour {
 	public GameObject wall_of_doom;
 	public GameObject player_sphere_prefab;
 	public GameObject maze_field;
+	public GameObject maze_wall;
 	public GameObject maze_note;
 	public GameObject redrawing_field;
 	public GameObject base_note;
@@ -13,6 +14,7 @@ public class GameEntity : MonoBehaviour {
 
 	List<GameObject> maze_field_coordinates = new List<GameObject>();
 	Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
+	Dictionary<string,GameObject> maze_walls_coordinates_hash = new Dictionary<string,GameObject>();
 	List<GameObject> maze_notes = new List<GameObject>();
 
 	int collected_notes = 0;
@@ -97,6 +99,29 @@ public class GameEntity : MonoBehaviour {
 		else {
 
 			return create_maze_field(x, y);
+		}
+	}
+
+	GameObject create_maze_wall (float pos_x, float pos_y) {
+
+		string array_index = pos_x.ToString() + '-' + pos_y.ToString();
+		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
+		maze_walls_coordinates_hash.Add (array_index, new_maze_wall);
+
+		return new_maze_wall;
+	}
+
+	GameObject find_or_create_wall_at_coordinates (float x, float y) {
+		
+		string array_index = x.ToString() + '-' + y.ToString();
+		
+		if (maze_walls_coordinates_hash.ContainsKey(array_index)) {
+			
+			return maze_walls_coordinates_hash[array_index];
+		}
+		else {
+
+			return create_maze_wall(x, y);
 		}
 	}
 
@@ -289,7 +314,7 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	void build_maze() {
-		if (maze_initialized < 4) {
+		while (maze_initialized < 4) {
 			GameObject last_maze_field;
 			int difficulty_steps = 10;
 			last_maze_field = draw_maze_tunnel(maze_initialized, 0, 0, difficulty_steps);
@@ -305,8 +330,17 @@ public class GameEntity : MonoBehaviour {
 
 			maze_initialized++;
 		}
-		
-		// draw corners
+
+		if (maze_initialized == 4) {
+			// draw corners
+			draw_maze_corners();
+
+			// draw walls
+			draw_maze_walls();
+		}
+	}
+
+	void draw_maze_corners() {
 		if (maze_initialized == 4) {
 
 			// figure out boundaries of maze
@@ -347,6 +381,7 @@ public class GameEntity : MonoBehaviour {
 				row_count++;
 			}
 
+			// place base note
 			base_note_ingame = (GameObject)Instantiate(base_note, new Vector3(last_created_tunnel.transform.position.x, last_created_tunnel.transform.position.y, last_created_tunnel.transform.position.z - 1F), Quaternion.identity);
 			base_note_ingame.transform.Rotate(270F, 0F, 0F);
 			player_sphere = base_note_ingame;
@@ -355,6 +390,40 @@ public class GameEntity : MonoBehaviour {
 			adjust_camera();
 
 			maze_initialized++;
+		}
+	}
+
+	void draw_maze_walls() {
+
+		int counter = 0;
+
+		foreach (KeyValuePair<int,GameObject> field in maze_field_coordinates_hash) {
+			maze_field_script field_script = get_maze_field_script_from_game_object(field.Value);
+
+			// field_script.coord_x
+			// field_script.coord_y
+
+			GameObject new_wall;
+
+			counter++;
+
+			if (counter > 0) {
+
+				if (!field_script.removed_top()) {
+					new_wall = find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) + 0.5F);
+					new_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
+				}
+				if (!field_script.removed_bottom()) {
+					new_wall = find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) - 0.5F);
+					new_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
+				}
+				if (!field_script.removed_left()) {
+					new_wall = find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) - 0.5F, field_script.coord_y * 1.0F);
+				}
+				if (!field_script.removed_right()) {
+					new_wall = find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) + 0.5F, field_script.coord_y * 1.0F);
+				}
+			}
 		}
 	}
 

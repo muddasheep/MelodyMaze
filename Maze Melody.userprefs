@@ -2,8 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\GameEntity.cs">
     <Files>
-      <File FileName="Assets\scripts\GameEntity.cs" Line="312" Column="36" />
-      <File FileName="Assets\scripts\maze_field_script.cs" Line="89" Column="1" />
+      <File FileName="Assets\scripts\GameEntity.cs" Line="395" Column="2" />
+      <File FileName="Assets\scripts\maze_field_script.cs" Line="80" Column="5" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
