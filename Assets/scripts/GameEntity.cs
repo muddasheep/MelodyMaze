@@ -104,25 +104,41 @@ public class GameEntity : MonoBehaviour {
 
 	GameObject create_maze_wall (float pos_x, float pos_y) {
 
-		string array_index = pos_x.ToString() + '-' + pos_y.ToString();
+		string array_index = wall_hash_index(pos_x, pos_y);
 		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
 		maze_walls_coordinates_hash.Add (array_index, new_maze_wall);
+
+		maze_wall_script next_maze_wall_script = get_maze_wall_script_from_game_object(new_maze_wall);
+		next_maze_wall_script.FadeOut();
 
 		return new_maze_wall;
 	}
 
 	GameObject find_or_create_wall_at_coordinates (float x, float y) {
-		
-		string array_index = x.ToString() + '-' + y.ToString();
-		
-		if (maze_walls_coordinates_hash.ContainsKey(array_index)) {
+
+		if (wall_at_coordinates_exists(x, y)) {
 			
-			return maze_walls_coordinates_hash[array_index];
+			return maze_walls_coordinates_hash[wall_hash_index(x, y)];
 		}
 		else {
 
 			return create_maze_wall(x, y);
 		}
+	}
+
+	string wall_hash_index (float x, float y) {
+		string array_index = x.ToString() + '-' + y.ToString();
+
+		return array_index;
+	}
+
+	bool wall_at_coordinates_exists (float x, float y) {
+		if (maze_walls_coordinates_hash.ContainsKey(wall_hash_index(x, y))) {
+			
+			return true;
+		}
+
+		return false;
 	}
 
 	bool field_at_coordinates_exists(int x, int y) {
@@ -478,6 +494,11 @@ public class GameEntity : MonoBehaviour {
 		return next_maze_script;
 	}
 
+	maze_wall_script get_maze_wall_script_from_game_object(GameObject maze_wall_object) {
+		maze_wall_script next_wall_script = (maze_wall_script)maze_wall_object.GetComponent(typeof(maze_wall_script));
+		return next_wall_script;
+	}
+
 	base_note_script get_base_note_script_from_game_object(GameObject base_note_object) {
 		base_note_script next_base_script = (base_note_script)base_note_object.GetComponent(typeof(base_note_script));
 		return next_base_script;
@@ -565,7 +586,54 @@ public class GameEntity : MonoBehaviour {
 					player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
 				}
 				player_target_position = new Vector3(player_coord_x, player_coord_y, player_z);
+
+				highlight_walls_around_maze_field(current_maze_field, true);
+
+				maze_field_script next_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
+				highlight_walls_around_maze_field(next_maze_field, false);
 			}
+		}
+	}
+
+	void highlight_walls_around_maze_field(maze_field_script given_maze_field, bool fadeout) {
+		float start_x = given_maze_field.coord_x;
+		float start_y = given_maze_field.coord_y;
+
+		float check_x = start_x;
+		float check_y = start_y;
+
+		int count = 0;
+
+		while ( count < 4 ) {
+
+			check_x = start_x;
+			check_y = start_y;
+
+			if (count == 0) {
+				check_x -= 0.5F;
+			}
+			if (count == 1) {
+				check_x += 0.5F;
+			}
+			if (count == 2) {
+				check_y += 0.5F;
+			}
+			if (count == 3) {
+				check_y -= 0.5F;
+			}
+
+			if (wall_at_coordinates_exists(check_x, check_y)) {
+				GameObject found_wall = find_or_create_wall_at_coordinates(check_x, check_y);
+				maze_wall_script found_wall_script = get_maze_wall_script_from_game_object(found_wall);
+				if (fadeout == true) {
+					found_wall_script.FadeOut();
+				}
+				else {
+					found_wall_script.FadeIn();
+				}
+			}
+
+			count++;
 		}
 	}
 
