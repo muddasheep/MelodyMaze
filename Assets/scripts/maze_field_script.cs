@@ -38,6 +38,7 @@ public class maze_field_script : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
 	}
 
 	public bool can_remove_sides() {
@@ -80,5 +81,44 @@ public class maze_field_script : MonoBehaviour {
 		//Destroy( wall_left );
 		wall_left_removed = true;
 		removed_sides++;
+	}
+
+	public void quake(float magnification, float delay) {
+		StopAllCoroutines();
+
+		// down
+		Vector3 target_position1 = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z + 0.9F);
+		smooth_move(gameObject.transform.position, target_position1, 0.5F, 0F + delay, gameObject);
+
+		// up
+		Vector3 target_position2 = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z - 0.3F);
+		smooth_move(target_position1, target_position2, 0.4F, 0.5F + delay, gameObject);
+
+		// down softer
+		Vector3 target_position3 = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z + 0.3F);
+		smooth_move(target_position2, target_position3, 0.3F, 0.9F + delay, gameObject);
+
+		// up normal
+		Vector3 target_position4 = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z);
+		smooth_move(target_position3, target_position4, 0.2F, 1.2F + delay, gameObject);
+	}
+
+	void smooth_move (Vector3 startpos, Vector3 endpos, float seconds, float delay_seconds, GameObject moving_object) {
+		StartCoroutine(smooth_move_iterator(startpos, endpos, seconds, delay_seconds, moving_object));
+	}
+	
+	IEnumerator smooth_move_iterator (Vector3 startpos, Vector3 endpos, float seconds, float delay_seconds, GameObject moving_object) {
+		float t = 0.0F;
+		while (t <= 1.0F) {
+			t += Time.deltaTime/delay_seconds;
+			yield return null;
+		}
+		
+		t = 0.0F;
+		while (t <= 1.0F) {
+			t += Time.deltaTime/seconds;
+			moving_object.transform.position = Vector3.Lerp(startpos, endpos, Mathf.SmoothStep(0.0F, 1.0F, t));
+			yield return null;
+		}
 	}
 }
