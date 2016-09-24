@@ -175,7 +175,7 @@ public class GameEntity : MonoBehaviour {
 
 		if (player_coord_x == 0 && player_coord_y == 0 && player_sphere_moving == false && base_note_reached_center == false) {
 			base_note_reached_center = true;
-			quake_from_current_position();
+			quake_from_current_position(0.8F);
 			base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
 			next_base_note_script.set_up_base_camp();
 		}
@@ -227,20 +227,20 @@ public class GameEntity : MonoBehaviour {
 		}
 	}
 
-	void quake_from_current_position() {
+	void quake_from_current_position(float delay) {
 		int maze_wave_radius_counter = 0;
 
 		maze_field_script current_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
 
-		int walk_x = player_coord_x - 3;
-		int walk_y = player_coord_x - 3;
-		int max_x  = player_coord_x + 3;
-		int max_y  = player_coord_y + 3;
+		int radius = 4;
+		int walk_x = player_coord_x - radius;
+		int walk_y = player_coord_x - radius;
+		int max_x  = player_coord_x + radius;
+		int max_y  = player_coord_y + radius;
 
 		while (walk_y < max_y) {
 
 			if (field_at_coordinates_exists(walk_x, walk_y)) {
-				Debug.Log (walk_x.ToString() + ' ' + walk_y.ToString());
 				GameObject maze_field_target = find_or_create_field_at_coordinates(walk_x, walk_y);
 				maze_field_script gotten_maze_script = get_maze_field_script_from_game_object(maze_field_target);
 
@@ -251,11 +251,11 @@ public class GameEntity : MonoBehaviour {
 				walk_x++;
 
 				if (walk_x > max_x) {
-					walk_x = player_coord_x - 3;
+					walk_x = player_coord_x - radius;
 					walk_y++;
 				}
 
-				gotten_maze_script.quake(1F, Mathf.Max(diff_x + diff_y) / 5F);
+				gotten_maze_script.quake(1F, delay + (Mathf.Max(diff_x + diff_y) / 5F));
 			}
 		}
 	}
