@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GameEntity : MonoBehaviour {
+	public float start_time = 0;
+	public float current_time = 0;
+
 	public GameObject wall_of_doom;
 	public GameObject player_sphere_prefab;
 	public GameObject maze_field;
@@ -32,7 +35,9 @@ public class GameEntity : MonoBehaviour {
 	int player_coord_y = 0;
 	Vector3 player_target_position;
 	bool player_sphere_moving = false;
-	
+	float base_note_speed_x = 0F;
+	float base_note_speed_y = 0F;
+
 	public class TakenPath {
 		public int coord_x { get; set; }
 		public int coord_y { get; set; }
@@ -49,27 +54,8 @@ public class GameEntity : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		// build maze fields
-		/*float pos_x = -7F;
-		float pos_y = -4F;
 
-		int row_count = 0;
-		int col_count = 0;
-
-		while (row_count < 9) {
-			while (col_count < 15) {
-				create_maze_field(col_count, row_count);
-
-				pos_x++;
-				col_count++;
-			}
-
-			pos_x = -7F;
-			pos_y += 1F;
-
-			col_count = 0;
-			row_count++;
-		}*/
+		start_time = Time.time;
 	}
 
 	GameObject create_maze_field (int col_count, int row_count) {
@@ -148,7 +134,8 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
+		current_time = Time.time - start_time;
 
 		if (maze_deconstruction == true) {
 			deconstruct_maze();
@@ -178,6 +165,8 @@ public class GameEntity : MonoBehaviour {
 			quake_from_current_position(0.8F);
 			base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
 			next_base_note_script.set_up_base_camp();
+
+			smooth_move(player_sphere.transform.position, new Vector3(0F, 0F, -4.7F), 0.5F, 0F, player_sphere);
 		}
 	}
 
@@ -248,14 +237,14 @@ public class GameEntity : MonoBehaviour {
 				int diff_x = Mathf.Abs(walk_x - player_coord_x);
 				int diff_y = Mathf.Abs(walk_y - player_coord_y);
 
-				walk_x++;
-
-				if (walk_x > max_x) {
-					walk_x = player_coord_x - radius;
-					walk_y++;
-				}
-
 				gotten_maze_script.quake(1F, delay + (Mathf.Max(diff_x + diff_y) / 5F));
+			}
+
+			walk_x++;
+
+			if (walk_x > max_x) {
+				walk_x = player_coord_x - radius;
+				walk_y++;
 			}
 		}
 	}
@@ -508,6 +497,94 @@ public class GameEntity : MonoBehaviour {
 		if (!player_sphere) {
 			return;
 		}
+
+		if (base_note_reached_center == false) {
+			move_base_note();
+		}
+		else {
+			move_current_note();
+		}
+	}
+
+	void move_base_note() {
+		// accelerate and decelerate
+		float player_z = player_sphere.transform.position.z;
+		float player_y = player_sphere.transform.position.y;
+		float player_x = player_sphere.transform.position.x;
+
+		float speed_limit = 0.05F;
+
+		bool pressed_x = false;
+		bool pressed_y = false;
+
+		if (player_pressed_up()) {
+			base_note_speed_y += 0.001F;
+			pressed_y = true;
+		}
+		if (player_pressed_down()) {
+			base_note_speed_y -= 0.001F;
+			pressed_y = true;
+		}
+		if (player_pressed_left()) {
+			base_note_speed_x -= 0.001F;
+			pressed_x = true;
+		}
+		if (player_pressed_right()) {
+			base_note_speed_x += 0.001F;
+			pressed_x = true;
+		}
+
+		if (pressed_x == false) {
+			if (base_note_speed_x < 0) {
+				base_note_speed_x += 0.001F;
+			}
+			if (base_note_speed_x > 0) {
+				base_note_speed_x -= 0.001F;
+			}
+			if (Mathf.Abs(base_note_speed_x) < 0.001F) {
+				base_note_speed_x = 0;
+			}
+		}
+		if (pressed_y == false) {
+			if (base_note_speed_y < 0) {
+				base_note_speed_y += 0.001F;
+			}
+			if (base_note_speed_y > 0) {
+				base_note_speed_y -= 0.001F;
+			}
+			if (Mathf.Abs(base_note_speed_y) < 0.001F) {
+				base_note_speed_y = 0;
+			}
+		}
+
+		if (base_note_speed_x > speed_limit) {
+			base_note_speed_x = speed_limit;
+		}
+		if (base_note_speed_x < 0 - speed_limit) {
+			base_note_speed_x = 0 - speed_limit;
+		}
+		if (base_note_speed_y > speed_limit) {
+			base_note_speed_y = speed_limit;
+		}
+		if (base_note_speed_y < 0 - speed_limit) {
+			base_note_speed_y = 0 - speed_limit;
+		}
+
+		player_x += base_note_speed_x;
+		player_y += base_note_speed_y;
+		player_z = 0 - 5.0F - (0.5F * Mathf.Sin(current_time));
+
+		player_sphere.transform.position = new Vector3(player_x, player_y, player_z);
+
+		// highlight field walls based on rounded coords
+		player_coord_x = Mathf.RoundToInt(player_x);
+		player_coord_y = Mathf.RoundToInt(player_y);
+
+		adjust_camera();
+	}
+
+	void move_current_note() {
+		
 		float player_z = player_sphere.transform.position.z;
 		
 		bool allow_movement = true;
@@ -522,11 +599,11 @@ public class GameEntity : MonoBehaviour {
 			
 			allow_movement = false;
 			adjust_camera();
-
+			
 			if (distance < 0.1F) {
 				allow_movement = true;
 				note_collected = check_note_collection();
-
+				
 				if (distance < 0.01F) {
 					player_sphere_moving = false;
 					player_sphere.transform.position = player_target_position;
@@ -538,8 +615,8 @@ public class GameEntity : MonoBehaviour {
 			// CONTROL TIME
 			maze_field_script current_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
 			bool direction_pressed = false;
-
-			if (Input.GetKey (KeyCode.RightArrow) || Input.GetAxis("Horizontal") > 0.1F) {
+			
+			if (player_pressed_right()) {
 				if (current_maze_field.removed_right() == true) {
 					player_coord_x++;
 					player_sphere_moving = true;
@@ -547,7 +624,7 @@ public class GameEntity : MonoBehaviour {
 				}
 			}
 			else {
-				if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F) {
+				if (player_pressed_down()) {
 					if (current_maze_field.removed_bottom() == true) {
 						player_coord_y--;
 						player_sphere_moving = true;
@@ -555,7 +632,7 @@ public class GameEntity : MonoBehaviour {
 					}
 				}
 				else {
-					if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F) {
+					if (player_pressed_up()) {
 						if (current_maze_field.removed_top() == true) {
 							player_coord_y++;
 							player_sphere_moving = true;
@@ -563,7 +640,7 @@ public class GameEntity : MonoBehaviour {
 						}
 					}
 					else {
-						if (Input.GetKey (KeyCode.LeftArrow) || Input.GetAxis("Horizontal") < -0.1F) {
+						if (player_pressed_left()) {
 							if (current_maze_field.removed_left() == true) {
 								player_coord_x--;
 								player_sphere_moving = true;
@@ -579,13 +656,45 @@ public class GameEntity : MonoBehaviour {
 					player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
 				}
 				player_target_position = new Vector3(player_coord_x, player_coord_y, player_z);
-
+				
 				highlight_walls_around_maze_field(current_maze_field, true);
-
+				
 				maze_field_script next_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
 				highlight_walls_around_maze_field(next_maze_field, false);
 			}
 		}
+	}
+
+	bool player_pressed_up() {
+		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F) {
+			return true;
+		}
+
+		return false;
+	}
+
+	bool player_pressed_down() {
+		if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F) {
+			return true;
+		}
+
+		return false;
+	}
+
+	bool player_pressed_right() {
+		if (Input.GetKey (KeyCode.RightArrow) || Input.GetAxis("Horizontal") > 0.1F) {
+			return true;
+		}
+
+		return false;
+	}
+
+	bool player_pressed_left() {
+		if (Input.GetKey (KeyCode.LeftArrow) || Input.GetAxis("Horizontal") < -0.1F) {
+			return true;
+		}
+
+		return false;
 	}
 
 	void highlight_walls_around_maze_field(maze_field_script given_maze_field, bool fadeout) {
