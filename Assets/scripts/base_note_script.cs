@@ -8,6 +8,11 @@ public class base_note_script : MonoBehaviour {
 	public GameObject note_wing_right;
 	public GameObject note_wing_bottom;
 
+	public GameObject base_note_1;
+	public GameObject base_note_2;
+	public GameObject base_note_3;
+	public GameObject base_note_4;
+
 	bool set_up_camp = false;
 
 	// Use this for initialization
