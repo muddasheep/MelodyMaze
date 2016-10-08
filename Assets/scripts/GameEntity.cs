@@ -21,6 +21,7 @@ public class GameEntity : MonoBehaviour {
 	public int player_coord_y = 0;
 	Vector3 player_target_position;
 	bool player_sphere_moving = false;
+	bool player_can_move = true;
 	float base_note_speed_x = 0F;
 	float base_note_speed_y = 0F;
 
@@ -58,8 +59,9 @@ public class GameEntity : MonoBehaviour {
 			mazeman.build_maze();
 
 			// move player
-			if (player_spheres == 0 && base_note_reached_center == true) {
+			if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action()) {
 				spawn_player_sphere();
+				player_can_move = true;
 			}
 			else {
 				check_base_note_reach_center();
@@ -188,7 +190,10 @@ public class GameEntity : MonoBehaviour {
 
 				if (collected_notes < mazeman.maze_notes.Count) {
 					// spawn another player sphere
-					spawn_player_sphere();
+					player_spheres--;
+					player_sphere = base_note_ingame;
+					player_can_move = false;
+					adjust_camera();
 				}
 				else {
 					mazeman.maze_deconstruction = true;
@@ -238,6 +243,10 @@ public class GameEntity : MonoBehaviour {
 
 	void player_movement() {
 		if (!player_sphere) {
+			return;
+		}
+
+		if (!player_can_move) {
 			return;
 		}
 
