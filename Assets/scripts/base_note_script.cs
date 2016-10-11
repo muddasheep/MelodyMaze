@@ -13,6 +13,9 @@ public class base_note_script : MonoBehaviour {
 	public GameObject base_note_3;
 	public GameObject base_note_4;
 
+	int current_base_note_sent = 0;
+	public GameObject current_base_note = null;
+
 	bool set_up_camp = false;
 
 	// Use this for initialization
@@ -31,7 +34,33 @@ public class base_note_script : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if (current_base_note) {
+			if(current_base_note.transform.position.z > -25F) {
+				Vector3 target_position = new Vector3(current_base_note.transform.position.x, current_base_note.transform.position.y, -25F);
+				Vector3 new_position = Vector3.Lerp(current_base_note.transform.position, target_position, Time.deltaTime * 10);
+				current_base_note.transform.position = new_position;
+			}
+			else {
+				current_base_note = null;
+			}
+		}
+	}
 
+	public void send_next_note_flying() {
+		current_base_note_sent++;
+
+		if (current_base_note_sent == 1) {
+			current_base_note = base_note_1;
+		}
+		if (current_base_note_sent == 2) {
+			current_base_note = base_note_2;
+		}
+		if (current_base_note_sent == 3) {
+			current_base_note = base_note_3;
+		}
+		if (current_base_note_sent == 4) {
+			current_base_note = base_note_4;
+		}
 	}
 
 	public void set_up_base_camp() {

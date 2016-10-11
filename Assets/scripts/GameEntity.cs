@@ -60,7 +60,10 @@ public class GameEntity : MonoBehaviour {
 
 			// move player
 			if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action()) {
-				spawn_player_sphere();
+				base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
+				next_base_note_script.send_next_note_flying();
+
+				spawn_player_sphere(0.3F);
 				player_can_move = true;
 			}
 			else {
@@ -89,6 +92,7 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	public void adjust_camera() {
+
 		if (!player_sphere) {
 			return;
 		}
@@ -166,6 +170,11 @@ public class GameEntity : MonoBehaviour {
 		while (t <= 1.0F) {
 			t += Time.deltaTime/seconds;
 			moving_object.transform.position = Vector3.Lerp(startpos, endpos, Mathf.SmoothStep(0.0F, 1.0F, t));
+
+			if (moving_object == base_note_ingame) {
+				adjust_camera();
+			}
+
 			yield return null;
 		}
 	}
@@ -189,11 +198,10 @@ public class GameEntity : MonoBehaviour {
 				player_sphere.transform.parent = current_maze_field.gameObject.transform;
 
 				if (collected_notes < mazeman.maze_notes.Count) {
-					// spawn another player sphere
-					player_spheres--;
-					player_sphere = base_note_ingame;
+					// let another player sphere spawn
 					player_can_move = false;
-					adjust_camera();
+
+					finish_note_collection();
 				}
 				else {
 					mazeman.maze_deconstruction = true;
@@ -212,6 +220,23 @@ public class GameEntity : MonoBehaviour {
 		}
 
 		return false;
+	}
+
+	IEnumerator finish_note_collection_delay(float delay_seconds) {
+		float t = 0.0F;
+		while (t <= 1.0F) {
+			t += Time.deltaTime/delay_seconds;
+			yield return null;
+		}
+
+		player_spheres--;
+		player_sphere = base_note_ingame;
+		adjust_camera();
+		player_sphere = null;
+	}
+
+	void finish_note_collection() {
+		StartCoroutine(finish_note_collection_delay(1F));
 	}
 
 	public maze_note_script get_maze_note_script_from_game_object(GameObject maze_note_object) {
@@ -259,6 +284,11 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	void move_base_note() {
+
+		if (base_note_reached_center) {
+			return;
+		}
+
 		// accelerate and decelerate
 		float player_z = player_sphere.transform.position.z;
 		float player_y = player_sphere.transform.position.y;
@@ -326,6 +356,19 @@ public class GameEntity : MonoBehaviour {
 		player_y += base_note_speed_y;
 		player_z = 0 - 5.0F - (0.5F * Mathf.Sin(current_time));
 
+		float correction_player_x = check_base_note_horizontal_limit(player_x);
+		float correction_player_y = check_base_note_vertical_limit(player_y);
+
+		if (correction_player_x != player_x) {
+			base_note_speed_x = 0;
+			player_x = correction_player_x;
+		}
+
+		if (correction_player_y != player_y) {
+			base_note_speed_y = 0;
+			player_y = correction_player_y;
+		}
+
 		player_sphere.transform.position = new Vector3(player_x, player_y, player_z);
 
 		// highlight field walls based on rounded coords
@@ -335,18 +378,60 @@ public class GameEntity : MonoBehaviour {
 		adjust_camera();
 	}
 
-	void move_current_note() {
+	float check_base_note_horizontal_limit(float x) {
+
+		if (x < mazeman.maze_border_left) {
+			return mazeman.maze_border_left;
+		}
 		
-		float player_z = player_sphere.transform.position.z;
+		if (x > mazeman.maze_border_right) {
+			return mazeman.maze_border_right;
+		}
+
+		return x;
+	}
+
+	float check_base_note_vertical_limit(float y) {
+
+		if (y > mazeman.maze_border_top) {
+			return mazeman.maze_border_top;
+		}
+		
+		if (y < mazeman.maze_border_bottom) {
+			return mazeman.maze_border_bottom;
+		}
+
+		return y;
+	}
+
+	void move_current_note() {
+
+		if (base_note_ingame == player_sphere) {
+			return;
+		}
 		
 		bool allow_movement = true;
 		bool note_collected = false;
 		
 		if (player_sphere_moving == true) {
+			bool direction_pressed = false;
+			if (player_sphere.transform.position.z >= -4.3F) {
+				if (player_pressed_right() || player_pressed_left() || player_pressed_down() || player_pressed_up()) {
+					direction_pressed = true;
+				}
+			}
+
 			// MOVE TIME
+
 			Vector3 new_position = Vector3.Lerp(player_sphere.transform.position, player_target_position, Time.deltaTime * 10);
+
+			if (direction_pressed == true) {
+				Vector3 pressed_target_position = new Vector3(player_coord_x, player_coord_y, -4.3F);
+				new_position = Vector3.MoveTowards(player_sphere.transform.position, pressed_target_position, 0.1F);
+			}
+
 			player_sphere.transform.position = new_position;
-			
+
 			float distance = Vector3.Distance(new_position, player_target_position);
 			
 			allow_movement = false;
@@ -375,39 +460,33 @@ public class GameEntity : MonoBehaviour {
 					direction_pressed = true;
 				}
 			}
-			else {
-				if (player_pressed_down()) {
-					if (current_maze_field.removed_bottom() == true) {
-						player_coord_y--;
-						player_sphere_moving = true;
-						direction_pressed = true;
-					}
-				}
-				else {
-					if (player_pressed_up()) {
-						if (current_maze_field.removed_top() == true) {
-							player_coord_y++;
-							player_sphere_moving = true;
-							direction_pressed = true;
-						}
-					}
-					else {
-						if (player_pressed_left()) {
-							if (current_maze_field.removed_left() == true) {
-								player_coord_x--;
-								player_sphere_moving = true;
-								direction_pressed = true;
-							}
-						}
-					}
+			if (player_pressed_down() && !player_sphere_moving) {
+				if (current_maze_field.removed_bottom() == true) {
+					player_coord_y--;
+					player_sphere_moving = true;
+					direction_pressed = true;
 				}
 			}
-			
+			if (player_pressed_up() && !player_sphere_moving) {
+				if (current_maze_field.removed_top() == true) {
+					player_coord_y++;
+					player_sphere_moving = true;
+					direction_pressed = true;
+				}
+			}
+			if (player_pressed_left() && !player_sphere_moving) {
+				if (current_maze_field.removed_left() == true) {
+					player_coord_x--;
+					player_sphere_moving = true;
+					direction_pressed = true;
+				}
+			}
+
 			if (player_sphere_moving == true && direction_pressed == true) {
 				if (base_note_reached_center == true) {
 					player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
 				}
-				player_target_position = new Vector3(player_coord_x, player_coord_y, player_z);
+				player_target_position = new Vector3(player_coord_x, player_coord_y, -4.3F);
 				
 				mazeman.highlight_walls_around_maze_field(current_maze_field, true);
 				
@@ -417,9 +496,17 @@ public class GameEntity : MonoBehaviour {
 		}
 	}
 
+	bool player_action_button_down = false;
+
 	bool player_pressed_action() {
 		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
-			return true;
+			if (player_action_button_down == false) {
+				player_action_button_down = true;
+				return true;
+			}
+		}
+		else {
+			player_action_button_down = false;
 		}
 
 		return false;
@@ -457,13 +544,27 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	void spawn_player_sphere() {
-		player_sphere = (GameObject)Instantiate(player_sphere_prefab, new Vector3(0, 0, -44.3F), Quaternion.identity);
+	IEnumerator spawn_player_sphere_routine(float delay_seconds) {
+		float t = 0.0F;
+		while (t <= 1.0F) {
+			t += Time.deltaTime/delay_seconds;
+			yield return null;
+		}
+
+		player_sphere = (GameObject)Instantiate(
+			player_sphere_prefab,
+			new Vector3(0, 0, -44.3F),
+			Quaternion.identity
+		);
+
 		player_sphere_moving = true;
 		player_target_position = new Vector3(0F, 0.0F, -4.3F);
 		player_coord_x = 0;
 		player_coord_y = 0;
+	}
+
+	void spawn_player_sphere(float delay_seconds) {
+		StartCoroutine(spawn_player_sphere_routine(delay_seconds));
 		player_spheres++;
-		adjust_camera();
 	}
 }

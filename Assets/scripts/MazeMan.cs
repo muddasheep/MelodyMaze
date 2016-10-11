@@ -8,6 +8,11 @@ public class MazeMan : MonoBehaviour {
 	public GameObject maze_wall;
 	public GameObject maze_note;
 
+	public int maze_border_left   = 0;
+	public int maze_border_right  = 0;
+	public int maze_border_top    = 0;
+	public int maze_border_bottom = 0;
+
 	public int maze_initialized = 0;
 
 	public Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
@@ -28,7 +33,23 @@ public class MazeMan : MonoBehaviour {
 		new_maze_field_script.coord_y = row_count;
 		maze_field_coordinates_hash.Add (coordinates_to_array_index(col_count, row_count), new_maze_field);
 		//maze_field_coordinates.Insert(coordinates_to_array_index(col_count, row_count), new_maze_field);
-		
+
+		if (pos_x > maze_border_right) {
+			maze_border_right = pos_x;
+		}
+
+		if (pos_x < maze_border_left) {
+			maze_border_left = pos_x;
+		}
+
+		if (pos_y > maze_border_top) {
+			maze_border_top = pos_y;
+		}
+
+		if (pos_y < maze_border_bottom) {
+			maze_border_bottom = pos_y;
+		}
+
 		return new_maze_field;
 	}
 	
