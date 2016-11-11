@@ -48,10 +48,12 @@
   <ItemGroup>
      <Compile Include="Assets\scripts\GameEntity.cs" />
      <Compile Include="Assets\scripts\MazeMan.cs" />
+     <Compile Include="Assets\scripts\MenuMan.cs" />
      <Compile Include="Assets\scripts\base_note_script.cs" />
      <Compile Include="Assets\scripts\maze_field_script.cs" />
      <Compile Include="Assets\scripts\maze_note_script.cs" />
      <Compile Include="Assets\scripts\maze_wall_script.cs" />
+     <Compile Include="Assets\scripts\menu_item_script.cs" />
      <None Include="Assets\shader\color_with_alpha.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

@@ -11,6 +11,7 @@ public class GameEntity : MonoBehaviour {
 	public Camera maze_cam;
 
 	MazeMan mazeman;
+	MenuMan menuman;
 
 	bool base_note_reached_center = false;
 	public GameObject base_note_ingame;
@@ -24,6 +25,8 @@ public class GameEntity : MonoBehaviour {
 	bool player_can_move = true;
 	float base_note_speed_x = 0F;
 	float base_note_speed_y = 0F;
+
+	bool game_running = false;
 
 	public class TakenPath {
 		public int coord_x { get; set; }
@@ -43,6 +46,7 @@ public class GameEntity : MonoBehaviour {
 	void Start () {
 
 		mazeman = GetComponent<MazeMan>();
+		menuman = GetComponent<MenuMan>();
 
 		start_time = Time.time;
 	}
@@ -51,28 +55,41 @@ public class GameEntity : MonoBehaviour {
 	void FixedUpdate () {
 		current_time = Time.time - start_time;
 
-		if (mazeman.maze_deconstruction == true) {
-			deconstruct_maze();
-		}
-		else {
+		if (game_running) {
 
-			mazeman.build_maze();
-
-			// move player
-			if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action()) {
-				base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
-				next_base_note_script.send_next_note_flying();
-
-				spawn_player_sphere(0.3F);
-				player_can_move = true;
+			if (mazeman.maze_deconstruction == true) {
+				deconstruct_maze();
 			}
 			else {
-				check_base_note_reach_center();
-				player_movement();
+
+				// move player
+				if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action()) {
+					base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
+					next_base_note_script.send_next_note_flying();
+
+					spawn_player_sphere(0.3F);
+					player_can_move = true;
+				}
+				else {
+					check_base_note_reach_center();
+					player_movement();
+				}
+			}
+		}
+		else {
+			if (menuman.displaying_menu == false) {
+				menuman.display_menu();
+				menuman.displaying_menu = true;
 			}
 		}
 	}
 
+	public void start_random_game() {
+		Debug.Log ("START RANDOM GAME");
+		mazeman.build_maze();
+		game_running = true;
+	}
+	
 	void check_base_note_reach_center() {
 		if (!player_sphere) {
 			return;
@@ -497,8 +514,12 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	bool player_action_button_down = false;
-
-	bool player_pressed_action() {
+	bool player_up_button_down = false;
+	bool player_down_button_down = false;
+	bool player_left_button_down = false;
+	bool player_right_button_down = false;
+	
+	public bool player_pressed_action() {
 		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
 			if (player_action_button_down == false) {
 				player_action_button_down = true;
@@ -512,7 +533,7 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	bool player_pressed_up() {
+	public bool player_pressed_up() {
 		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F) {
 			return true;
 		}
@@ -520,7 +541,7 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	bool player_pressed_down() {
+	public bool player_pressed_down() {
 		if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F) {
 			return true;
 		}
@@ -528,7 +549,7 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	bool player_pressed_right() {
+	public bool player_pressed_right() {
 		if (Input.GetKey (KeyCode.RightArrow) || Input.GetAxis("Horizontal") > 0.1F) {
 			return true;
 		}
@@ -536,7 +557,7 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	bool player_pressed_left() {
+	public bool player_pressed_left() {
 		if (Input.GetKey (KeyCode.LeftArrow) || Input.GetAxis("Horizontal") < -0.1F) {
 			return true;
 		}
@@ -544,6 +565,62 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
+	public bool player_pressed_up_once() {
+		if (player_pressed_up()) {
+			if (player_up_button_down == false) {
+				player_up_button_down = true;
+				return true;
+			}
+		}
+		else {
+			player_up_button_down = false;
+		}
+		
+		return false;
+	}
+
+	public bool player_pressed_down_once() {
+		if (player_pressed_down()) {
+			if (player_down_button_down == false) {
+				player_down_button_down = true;
+				return true;
+			}
+		}
+		else {
+			player_down_button_down = false;
+		}
+		
+		return false;
+	}
+
+	public bool player_pressed_left_once() {
+		if (player_pressed_left()) {
+			if (player_left_button_down == false) {
+				player_left_button_down = true;
+				return true;
+			}
+		}
+		else {
+			player_left_button_down = false;
+		}
+		
+		return false;
+	}
+
+	public bool player_pressed_right_once() {
+		if (player_pressed_right()) {
+			if (player_right_button_down == false) {
+				player_right_button_down = true;
+				return true;
+			}
+		}
+		else {
+			player_right_button_down = false;
+		}
+		
+		return false;
+	}
+	
 	IEnumerator spawn_player_sphere_routine(float delay_seconds) {
 		float t = 0.0F;
 		while (t <= 1.0F) {
