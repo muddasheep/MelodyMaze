@@ -24,16 +24,16 @@ public class MenuMan : MonoBehaviour {
 	List<MenuItem> start_menu = new List<MenuItem>();
 
 	GameEntity gameentity;
-	MazeMan mazeman;
 
 	// Use this for initialization
 	void Start () {
 		gameentity = GetComponent<GameEntity>();
-		mazeman = GetComponent<MazeMan>();
+
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
 		start_menu.Add(new MenuItem { text = "New Game" });
 		start_menu.Add(new MenuItem { text = "Random" });
+		start_menu.Add(new MenuItem { text = "Create" });
 		start_menu.Add(new MenuItem { text = "Credits" });
 	}
 	
@@ -46,9 +46,14 @@ public class MenuMan : MonoBehaviour {
 		if (gameentity.player_pressed_action()) {
 			int index = destroy_menu();
 
-			Debug.Log(index);
-			if (index == 1) {
+			MenuItem selected_item = start_menu[index];
+
+			Debug.Log(selected_item.text);
+			if (selected_item.text == "Random") {
 				gameentity.start_random_game();
+			}
+			if (selected_item.text == "Create") {
+				gameentity.start_editor();
 			}
 
 			displaying_menu = false;
@@ -107,6 +112,8 @@ public class MenuMan : MonoBehaviour {
 		}
 
 		highlighted_menu_item = null;
+
+		menu_item_highlighter_object.transform.position = new Vector3(0, 0, -100F);
 
 		return highlighted_index;
 	}

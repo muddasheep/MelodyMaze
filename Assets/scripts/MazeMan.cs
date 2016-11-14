@@ -72,7 +72,12 @@ public class MazeMan : MonoBehaviour {
 		string array_index = wall_hash_index(pos_x, pos_y);
 		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
 		maze_walls_coordinates_hash.Add (array_index, new_maze_wall);
-		
+
+		// check if it's a horizontal wall
+		if (Mathf.Floor(pos_y) != pos_y) {
+			new_maze_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
+		}
+
 		maze_wall_script next_maze_wall_script = gameentity.get_maze_wall_script_from_game_object(new_maze_wall);
 		next_maze_wall_script.FadeOut();
 		
@@ -309,25 +314,21 @@ public class MazeMan : MonoBehaviour {
 			// field_script.coord_x
 			// field_script.coord_y
 			
-			GameObject new_wall;
-			
 			counter++;
 			
 			if (counter > 0) {
 				
 				if (!field_script.removed_top()) {
-					new_wall = find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) + 0.5F);
-					new_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
+					find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) + 0.5F);
 				}
 				if (!field_script.removed_bottom()) {
-					new_wall = find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) - 0.5F);
-					new_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
+					find_or_create_wall_at_coordinates(field_script.coord_x * 1.0F, (field_script.coord_y * 1.0F) - 0.5F);
 				}
 				if (!field_script.removed_left()) {
-					new_wall = find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) - 0.5F, field_script.coord_y * 1.0F);
+					find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) - 0.5F, field_script.coord_y * 1.0F);
 				}
 				if (!field_script.removed_right()) {
-					new_wall = find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) + 0.5F, field_script.coord_y * 1.0F);
+					find_or_create_wall_at_coordinates((field_script.coord_x * 1.0F) + 0.5F, field_script.coord_y * 1.0F);
 				}
 			}
 		}
