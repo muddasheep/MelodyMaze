@@ -527,11 +527,7 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	bool player_action_button_down = false;
-	bool player_up_button_down = false;
-	bool player_down_button_down = false;
-	bool player_left_button_down = false;
-	bool player_right_button_down = false;
-	
+
 	public bool player_pressed_action() {
 		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
 			if (player_action_button_down == false) {
@@ -579,81 +575,72 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	bool repeated_once = false;
+	Dictionary<string,IEnumerator> player_button_press_coroutines = new Dictionary<string,IEnumerator>();
+	Dictionary<string,bool> player_button_pressed_down_once = new Dictionary<string,bool>();
 
-	private IEnumerator up_coroutine;
-	public IEnumerator player_press_up_repeat(float waitTime) {
+	private IEnumerator player_button_press_coroutine;
+	public IEnumerator player_press_button_repeat(float waitTime, string direction) {
 		yield return new WaitForSeconds(waitTime);
-		player_up_button_down = false;
+
+		player_button_pressed_down_once[direction] = false;
+
 		repeated_once = true;
 	}
-	public bool player_pressed_up_once() {
-		if (player_pressed_up()) {
-			if (player_up_button_down == false) {
-				player_up_button_down = true;
 
+	bool check_and_repeat_player_button_press(bool pressed, string direction) {
+		if (pressed) {
+			bool player_button_down;
+			player_button_pressed_down_once.TryGetValue(direction, out player_button_down);
+			if (player_button_down != true) {
+				player_button_pressed_down_once[direction] = true;
+				
 				if (repeated_once == false) {
-					up_coroutine = player_press_up_repeat(0.3F);
+					player_button_press_coroutines[direction] = player_press_button_repeat(0.3F, direction);
 				}
 				else {
-					up_coroutine = player_press_up_repeat(0.1F);
+					player_button_press_coroutines[direction] = player_press_button_repeat(0.1F, direction);
 				}
-				StartCoroutine(up_coroutine);
-
+				StartCoroutine(player_button_press_coroutines[direction]);
+				
 				return true;
 			}
 		}
 		else {
-			if (up_coroutine != null) {
-				StopCoroutine(up_coroutine);
-				up_coroutine = null;
+			IEnumerator coroutine_for_direction;
+			player_button_press_coroutines.TryGetValue(direction, out coroutine_for_direction);
+			if (coroutine_for_direction != null) {
+				StopCoroutine(coroutine_for_direction);
+				player_button_press_coroutines[direction] = null;
 				repeated_once = false;
 			}
-			player_up_button_down = false;
+			player_button_pressed_down_once[direction] = false;
 		}
 		
 		return false;
+	}
+
+	public bool player_pressed_up_once() {
+		bool pressed = player_pressed_up();
+
+		return check_and_repeat_player_button_press(pressed, "up");
 	}
 
 	public bool player_pressed_down_once() {
-		if (player_pressed_down()) {
-			if (player_down_button_down == false) {
-				player_down_button_down = true;
-				return true;
-			}
-		}
-		else {
-			player_down_button_down = false;
-		}
+		bool pressed = player_pressed_down();
 		
-		return false;
+		return check_and_repeat_player_button_press(pressed, "down");
 	}
 
 	public bool player_pressed_left_once() {
-		if (player_pressed_left()) {
-			if (player_left_button_down == false) {
-				player_left_button_down = true;
-				return true;
-			}
-		}
-		else {
-			player_left_button_down = false;
-		}
-		
-		return false;
+		bool pressed = player_pressed_left();
+
+		return check_and_repeat_player_button_press(pressed, "left");
 	}
 
 	public bool player_pressed_right_once() {
-		if (player_pressed_right()) {
-			if (player_right_button_down == false) {
-				player_right_button_down = true;
-				return true;
-			}
-		}
-		else {
-			player_right_button_down = false;
-		}
+		bool pressed = player_pressed_right();
 		
-		return false;
+		return check_and_repeat_player_button_press(pressed, "right");
 	}
 	
 	IEnumerator spawn_player_sphere_routine(float delay_seconds) {
