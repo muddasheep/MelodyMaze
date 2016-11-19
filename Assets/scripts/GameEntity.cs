@@ -127,6 +127,38 @@ public class GameEntity : MonoBehaviour {
 		maze_cam.transform.position = new Vector3(player_sphere.transform.position.x, player_sphere.transform.position.y, -20.8F);
 	}
 
+	public void center_camera_within_maze_bounds() {
+
+		if (!player_sphere) {
+			return;
+		}
+
+		int lowest_x = mazeman.maze_boundary_lowest_x - 5;
+		int lowest_y = mazeman.maze_boundary_lowest_y - 5;
+		int highest_x = mazeman.maze_boundary_highest_x + 5;
+		int highest_y = mazeman.maze_boundary_highest_y + 5;
+
+		float cam_x = player_sphere.transform.position.x;
+		float cam_y = player_sphere.transform.position.y;
+
+		if (cam_x < lowest_x + 6) {
+			cam_x = lowest_x + 6;
+		}
+		if (cam_x > highest_x - 6) {
+			cam_x = highest_x - 6;
+		}
+		if (cam_y < lowest_y + 4) {
+			cam_y = lowest_y + 4;
+		}
+		if (cam_y > highest_y - 4) {
+			cam_y = highest_y - 4;
+		}
+
+		Vector3 new_cam_pos = new Vector3(cam_x, cam_y, maze_cam.transform.position.z);
+
+		maze_cam.transform.position = new_cam_pos;
+	}
+
 	public int maze_path_redraw_rate_counter = 0;
 	public GameObject redrawing_field;
 	void deconstruct_maze() {
@@ -408,12 +440,12 @@ public class GameEntity : MonoBehaviour {
 
 	float check_base_note_horizontal_limit(float x) {
 
-		if (x < mazeman.maze_border_left) {
-			return mazeman.maze_border_left;
+		if (x < mazeman.maze_boundary_lowest_x) {
+			return mazeman.maze_boundary_lowest_x;
 		}
 		
-		if (x > mazeman.maze_border_right) {
-			return mazeman.maze_border_right;
+		if (x > mazeman.maze_boundary_highest_x) {
+			return mazeman.maze_boundary_highest_x;
 		}
 
 		return x;
@@ -421,12 +453,12 @@ public class GameEntity : MonoBehaviour {
 
 	float check_base_note_vertical_limit(float y) {
 
-		if (y > mazeman.maze_border_top) {
-			return mazeman.maze_border_top;
+		if (y > mazeman.maze_boundary_highest_y) {
+			return mazeman.maze_boundary_highest_y;
 		}
 		
-		if (y < mazeman.maze_border_bottom) {
-			return mazeman.maze_border_bottom;
+		if (y < mazeman.maze_boundary_lowest_y) {
+			return mazeman.maze_boundary_lowest_y;
 		}
 
 		return y;
@@ -669,7 +701,7 @@ public class GameEntity : MonoBehaviour {
 		
 		return check_and_repeat_player_button_press(pressed, "right");
 	}
-	
+
 	IEnumerator spawn_player_sphere_routine(float delay_seconds) {
 		float t = 0.0F;
 		while (t <= 1.0F) {

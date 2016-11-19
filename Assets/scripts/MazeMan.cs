@@ -8,11 +8,6 @@ public class MazeMan : MonoBehaviour {
 	public GameObject maze_wall;
 	public GameObject maze_note;
 
-	public int maze_border_left   = 0;
-	public int maze_border_right  = 0;
-	public int maze_border_top    = 0;
-	public int maze_border_bottom = 0;
-
 	public int maze_initialized = 0;
 
 	public Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
@@ -34,21 +29,7 @@ public class MazeMan : MonoBehaviour {
 		maze_field_coordinates_hash.Add (coordinates_to_array_index(col_count, row_count), new_maze_field);
 		//maze_field_coordinates.Insert(coordinates_to_array_index(col_count, row_count), new_maze_field);
 
-		if (pos_x > maze_border_right) {
-			maze_border_right = pos_x;
-		}
-
-		if (pos_x < maze_border_left) {
-			maze_border_left = pos_x;
-		}
-
-		if (pos_y > maze_border_top) {
-			maze_border_top = pos_y;
-		}
-
-		if (pos_y < maze_border_bottom) {
-			maze_border_bottom = pos_y;
-		}
+		update_maze_boundaries();
 
 		return new_maze_field;
 	}
@@ -244,32 +225,50 @@ public class MazeMan : MonoBehaviour {
 			count++;
 		}
 	}
-	
+
+	public int maze_boundary_lowest_x = 0;
+	public int maze_boundary_lowest_y = 0;
+	public int maze_boundary_highest_x = 0;
+	public int maze_boundary_highest_y = 0;
+
+	public void update_maze_boundaries() {
+		int lowest_x = 0;
+		int lowest_y = 0;
+		int highest_x = 0;
+		int highest_y = 0;
+		
+		foreach (KeyValuePair<int,GameObject> field in maze_field_coordinates_hash) {
+			maze_field_script field_script = gameentity.get_maze_field_script_from_game_object(field.Value);
+			
+			if (field_script.coord_x < lowest_x) {
+				lowest_x = field_script.coord_x;
+			}
+			if (field_script.coord_y < lowest_y) {
+				lowest_y = field_script.coord_y;
+			}
+			if (field_script.coord_x > highest_x) {
+				highest_x = field_script.coord_x;
+			}
+			if (field_script.coord_y > highest_y) {
+				highest_y = field_script.coord_y;
+			}
+		}
+
+		maze_boundary_lowest_x  = lowest_x;
+		maze_boundary_lowest_y  = lowest_y;
+		maze_boundary_highest_x = highest_x;
+		maze_boundary_highest_y = highest_y;
+	}
+
 	public void draw_maze_corners() {
 		if (maze_initialized == 4) {
-			
-			// figure out boundaries of maze
-			int lowest_x = 0;
-			int lowest_y = 0;
-			int highest_x = 0;
-			int highest_y = 0;
-			
-			foreach (KeyValuePair<int,GameObject> field in maze_field_coordinates_hash) {
-				maze_field_script field_script = gameentity.get_maze_field_script_from_game_object(field.Value);
-				
-				if (field_script.coord_x < lowest_x) {
-					lowest_x = field_script.coord_x;
-				}
-				if (field_script.coord_y < lowest_y) {
-					lowest_y = field_script.coord_y;
-				}
-				if (field_script.coord_x > highest_x) {
-					highest_x = field_script.coord_x;
-				}
-				if (field_script.coord_y > highest_y) {
-					highest_y = field_script.coord_y;
-				}
-			}
+
+			update_maze_boundaries();
+
+			int lowest_x = maze_boundary_lowest_x;
+			int lowest_y = maze_boundary_lowest_y;
+			int highest_x = maze_boundary_highest_x;
+			int highest_y = maze_boundary_highest_y;
 			
 			int row_count = lowest_y;
 			int col_count = lowest_x;
@@ -350,6 +349,7 @@ public class MazeMan : MonoBehaviour {
 			GameObject found_field = find_or_create_field_at_coordinates(int_x, int_y);
 			maze_field_coordinates_hash.Remove(coordinates_to_array_index(int_x, int_y));
 			Destroy(found_field);
+			update_maze_boundaries();
 		}
 	}
 

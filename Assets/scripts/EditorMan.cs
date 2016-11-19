@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class EditorMan : MonoBehaviour {
 
@@ -14,6 +15,13 @@ public class EditorMan : MonoBehaviour {
 	GameObject editing_maze_field;
 	maze_field_script editing_maze_field_script;
 
+	public class Coords {
+		public float wall_coord_x { get; set; }
+		public float wall_coord_y { get; set; }
+		public int field_coord_x { get; set; }
+		public int field_coord_y { get; set; }
+	}
+
 	// Use this for initialization
 	void Start () {
 		gameentity = GetComponent<GameEntity>();
@@ -23,6 +31,8 @@ public class EditorMan : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 		gameentity.detectPressedKeyOrButton();
+
+		gameentity.center_camera_within_maze_bounds();
 	}
 	
 	public void prepare_editor() {
@@ -94,10 +104,9 @@ public class EditorMan : MonoBehaviour {
 			mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
 
 			// add 4 walls
-			create_editor_wall_at_coordinates(pos_x + 0.5F, pos_y);
-			create_editor_wall_at_coordinates(pos_x - 0.5F, pos_y);
-			create_editor_wall_at_coordinates(pos_x, pos_y + 0.5F);
-			create_editor_wall_at_coordinates(pos_x, pos_y - 0.5F);
+			foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
+				create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+			}
 
 			return;
 		}
@@ -115,36 +124,44 @@ public class EditorMan : MonoBehaviour {
 			editing_maze_field_script = null;
 
 			// add walls if adjecent fields exist, remove walls if fields don't exist
-			if(mazeman.field_at_coordinates_exists(pos_x + 1, pos_y)) {
-				create_editor_wall_at_coordinates(pos_x + 0.5F, pos_y);
-			}
-			else {
-				mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
-			}
+			foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
 
-			if(mazeman.field_at_coordinates_exists(pos_x - 1, pos_y)) {
-				create_editor_wall_at_coordinates(pos_x - 0.5F, pos_y);
-			}
-			else {
-				mazeman.destroy_wall_at_coordinates(pos_x - 0.5F, pos_y);
-			}
-
-			if(mazeman.field_at_coordinates_exists(pos_x, pos_y + 1)) {
-				create_editor_wall_at_coordinates(pos_x, pos_y + 0.5F);
-			}
-			else {
-				mazeman.destroy_wall_at_coordinates(pos_x, pos_y + 0.5F);
-			}
-
-			if(mazeman.field_at_coordinates_exists(pos_x, pos_y - 1)) {
-				create_editor_wall_at_coordinates(pos_x, pos_y - 0.5F);
-			}
-			else {
-				mazeman.destroy_wall_at_coordinates(pos_x, pos_y - 0.5F);
+				if(mazeman.field_at_coordinates_exists(coords.field_coord_x, coords.field_coord_y)) {
+					create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+				}
+				else {
+					mazeman.destroy_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+				}
 			}
 
 			return;
 		}
+	}
+
+	public List<Coords> find_coordinates_around_pos(float x, float y) {
+		List<Coords> coordinates = new List<Coords>();
+
+		coordinates.Add(new Coords {
+			wall_coord_x  = x + 0.5F, wall_coord_y  = y,
+			field_coord_x = Mathf.RoundToInt(x + 1F), field_coord_y = Mathf.RoundToInt(y)
+		});
+
+		coordinates.Add(new Coords {
+			wall_coord_x  = x - 0.5F, wall_coord_y  = y,
+			field_coord_x = Mathf.RoundToInt(x - 1F), field_coord_y = Mathf.RoundToInt(y)
+		});
+
+		coordinates.Add(new Coords {
+			wall_coord_x  = x, wall_coord_y  = y + 0.5F,
+			field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y + 1F)
+		});
+
+		coordinates.Add(new Coords {
+			wall_coord_x  = x, wall_coord_y  = y - 0.5F,
+			field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y - 1F)
+		});
+
+		return coordinates;
 	}
 
 	void create_editor_wall_at_coordinates(float x, float y) {
