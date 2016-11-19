@@ -334,6 +334,25 @@ public class MazeMan : MonoBehaviour {
 		}
 	}
 
+	public void destroy_wall_at_coordinates(float x, float y) {
+		if (wall_at_coordinates_exists(x, y)) {
+			GameObject found_wall = find_or_create_wall_at_coordinates(x, y);
+			maze_walls_coordinates_hash.Remove(wall_hash_index(x, y));
+			Destroy(found_wall);
+		}
+	}
+
+	public void destroy_field_at_coordinates(float x, float y) {
+		int int_x = Mathf.RoundToInt(x);
+		int int_y = Mathf.RoundToInt(y);
+
+		if (field_at_coordinates_exists(int_x, int_y)) {
+			GameObject found_field = find_or_create_field_at_coordinates(int_x, int_y);
+			maze_field_coordinates_hash.Remove(coordinates_to_array_index(int_x, int_y));
+			Destroy(found_field);
+		}
+	}
+
 	GameObject draw_maze_tunnel(int current_direction, int start_x, int start_y, int steps) {
 		// build maze
 		// current_direction: 0 N, 1 E, 2 S, 3 W

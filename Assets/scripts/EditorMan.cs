@@ -8,8 +8,11 @@ public class EditorMan : MonoBehaviour {
 
 	int pos_x;
 	int pos_y;
+	int previous_pos_x;
+	int previous_pos_y;
 
 	GameObject editing_maze_field;
+	maze_field_script editing_maze_field_script;
 
 	// Use this for initialization
 	void Start () {
@@ -18,8 +21,8 @@ public class EditorMan : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	void FixedUpdate () {
+		gameentity.detectPressedKeyOrButton();
 	}
 	
 	public void prepare_editor() {
@@ -31,8 +34,13 @@ public class EditorMan : MonoBehaviour {
 			return;
 		}
 
-		if (gameentity.player_pressed_action()) {
+		if (gameentity.player_pressed_action_once()) {
 			editor_action();
+			return;
+		}
+
+		if (gameentity.player_pressed_action2_once()) {
+			editor_action_2();
 			return;
 		}
 
@@ -51,29 +59,100 @@ public class EditorMan : MonoBehaviour {
 			pos_x--;
 		}
 
+		check_paint_mode();
+
 		Vector3 new_position = new Vector3(pos_x, pos_y, pos_z);
 
 		gameentity.player_sphere.transform.position = new_position;
+
+		previous_pos_x = pos_x;
+		previous_pos_y = pos_y;
+	}
+
+	void check_paint_mode() {
+		// paint mode! if player kept pressing action, destroy wall between last and this one and call editor_action()
+		if (gameentity.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
+			editor_action();
+			if (pos_x < previous_pos_x) {
+				mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
+			}
+			if (pos_x > previous_pos_x) {
+				mazeman.destroy_wall_at_coordinates(pos_x - 0.5F, pos_y);
+			}
+			if (pos_y < previous_pos_y) {
+				mazeman.destroy_wall_at_coordinates(pos_x, pos_y + 0.5F);
+			}
+			if (pos_y > previous_pos_y) {
+				mazeman.destroy_wall_at_coordinates(pos_x, pos_y - 0.5F);
+			}
+		}
 	}
 
 	void editor_action() {
-
 		// if no field at current pos, create field
 		if (!mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
 			mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
 
 			// add 4 walls
-			mazeman.find_or_create_wall_at_coordinates(pos_x + 0.5F, pos_y);
-			mazeman.find_or_create_wall_at_coordinates(pos_x - 0.5F, pos_y);
-			mazeman.find_or_create_wall_at_coordinates(pos_x, pos_y + 0.5F);
-			mazeman.find_or_create_wall_at_coordinates(pos_x, pos_y - 0.5F);
+			create_editor_wall_at_coordinates(pos_x + 0.5F, pos_y);
+			create_editor_wall_at_coordinates(pos_x - 0.5F, pos_y);
+			create_editor_wall_at_coordinates(pos_x, pos_y + 0.5F);
+			create_editor_wall_at_coordinates(pos_x, pos_y - 0.5F);
 
 			return;
 		}
 
 		// if field at current pos, go into edit mode (walls + notes)
 		editing_maze_field = mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
-		maze_field_script next_maze_field = gameentity.get_maze_field_script(pos_x, pos_y);
-		mazeman.highlight_walls_around_maze_field(next_maze_field, true);
+		editing_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
+	}
+
+	void editor_action_2() {
+		// if field at current pos, destroy field
+		if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+			mazeman.destroy_field_at_coordinates(pos_x, pos_y);
+			editing_maze_field = null;
+			editing_maze_field_script = null;
+
+			// add walls if adjecent fields exist, remove walls if fields don't exist
+			if(mazeman.field_at_coordinates_exists(pos_x + 1, pos_y)) {
+				create_editor_wall_at_coordinates(pos_x + 0.5F, pos_y);
+			}
+			else {
+				mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
+			}
+
+			if(mazeman.field_at_coordinates_exists(pos_x - 1, pos_y)) {
+				create_editor_wall_at_coordinates(pos_x - 0.5F, pos_y);
+			}
+			else {
+				mazeman.destroy_wall_at_coordinates(pos_x - 0.5F, pos_y);
+			}
+
+			if(mazeman.field_at_coordinates_exists(pos_x, pos_y + 1)) {
+				create_editor_wall_at_coordinates(pos_x, pos_y + 0.5F);
+			}
+			else {
+				mazeman.destroy_wall_at_coordinates(pos_x, pos_y + 0.5F);
+			}
+
+			if(mazeman.field_at_coordinates_exists(pos_x, pos_y - 1)) {
+				create_editor_wall_at_coordinates(pos_x, pos_y - 0.5F);
+			}
+			else {
+				mazeman.destroy_wall_at_coordinates(pos_x, pos_y - 0.5F);
+			}
+
+			return;
+		}
+	}
+
+	void create_editor_wall_at_coordinates(float x, float y) {
+		GameObject new_wall;
+		maze_wall_script new_wall_script;
+
+		new_wall = mazeman.find_or_create_wall_at_coordinates(x, y);
+		new_wall_script = gameentity.get_maze_wall_script_from_game_object(new_wall);
+		new_wall_script.FadeIn();
 	}
 }

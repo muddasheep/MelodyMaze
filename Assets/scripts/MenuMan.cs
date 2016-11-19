@@ -43,12 +43,11 @@ public class MenuMan : MonoBehaviour {
 			return;
 		}
 
-		if (gameentity.player_pressed_action()) {
+		if (gameentity.player_pressed_action_once()) {
 			int index = destroy_menu();
 
 			MenuItem selected_item = start_menu[index];
 
-			Debug.Log(selected_item.text);
 			if (selected_item.text == "Random") {
 				gameentity.start_random_game();
 			}

@@ -66,7 +66,7 @@ public class GameEntity : MonoBehaviour {
 			else {
 
 				// move player
-				if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action()) {
+				if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action_once()) {
 					base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
 					next_base_note_script.send_next_note_flying();
 
@@ -92,13 +92,11 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	public void start_random_game() {
-		Debug.Log ("START RANDOM GAME");
 		mazeman.build_maze();
 		game_running = true;
 	}
 	
 	public void start_editor() {
-		Debug.Log ("START EDITOR");
 		editorman.prepare_editor();
 		editor_running = true;
 	}
@@ -108,7 +106,7 @@ public class GameEntity : MonoBehaviour {
 			return;
 		}
 
-		if (player_pressed_action () &&
+		if (player_pressed_action_once () &&
 			player_coord_x == 0 && player_coord_y == 0 &&
 		    player_sphere_moving == false && base_note_reached_center == false) {
 
@@ -526,9 +524,16 @@ public class GameEntity : MonoBehaviour {
 		}
 	}
 
-	bool player_action_button_down = false;
+	public void detectPressedKeyOrButton() {
+		foreach(KeyCode kcode in System.Enum.GetValues(typeof(KeyCode))) {
+			if (Input.GetKeyDown(kcode))
+				Debug.Log("KeyCode down: " + kcode);
+		}
+	}
 
-	public bool player_pressed_action() {
+	public bool player_action_button_down = false;
+
+	public bool player_pressed_action_once() {
 		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
 			if (player_action_button_down == false) {
 				player_action_button_down = true;
@@ -539,6 +544,22 @@ public class GameEntity : MonoBehaviour {
 			player_action_button_down = false;
 		}
 
+		return false;
+	}
+
+	public bool player_pressed_action() {
+		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	public bool player_pressed_action2() {
+		if (Input.GetKey (KeyCode.Delete) || Input.GetButton("Fire2")) {
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -617,6 +638,12 @@ public class GameEntity : MonoBehaviour {
 		}
 		
 		return false;
+	}
+
+	public bool player_pressed_action2_once() {
+		bool pressed = player_pressed_action2();
+		
+		return check_and_repeat_player_button_press(pressed, "action2");
 	}
 
 	public bool player_pressed_up_once() {
