@@ -50,6 +50,7 @@
      <Compile Include="Assets\scripts\GameEntity.cs" />
      <Compile Include="Assets\scripts\MazeMan.cs" />
      <Compile Include="Assets\scripts\MenuMan.cs" />
+     <Compile Include="Assets\scripts\SoundMan.cs" />
      <Compile Include="Assets\scripts\base_note_script.cs" />
      <Compile Include="Assets\scripts\maze_field_script.cs" />
      <Compile Include="Assets\scripts\maze_note_script.cs" />

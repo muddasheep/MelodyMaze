@@ -7,6 +7,7 @@ public class EditorMan : MonoBehaviour {
 	GameEntity gameentity;
 	MazeMan mazeman;
 	MenuMan menuman;
+	SoundMan soundman;
 
 	int pos_x;
 	int pos_y;
@@ -15,6 +16,9 @@ public class EditorMan : MonoBehaviour {
 
 	GameObject editing_maze_field;
 	maze_field_script editing_maze_field_script;
+
+	GameObject hover_maze_field;
+	maze_field_script hover_maze_field_script;
 
 	public GameObject piano_key_white_prototype;
 	public GameObject piano_key_black_prototype;
@@ -31,6 +35,7 @@ public class EditorMan : MonoBehaviour {
 		gameentity = GetComponent<GameEntity>();
 		mazeman    = GetComponent<MazeMan>();
 		menuman    = GetComponent<MenuMan>();
+		soundman   = GetComponent<SoundMan>();
 	}
 	
 	// Update is called once per frame
@@ -71,17 +76,23 @@ public class EditorMan : MonoBehaviour {
 
 		float pos_z = -4.4F;
 
+		bool moved = false;
+
 		if (gameentity.player_pressed_up_once()) {
 			pos_y++;
+			moved = true;
 		}
 		if (gameentity.player_pressed_down_once()) {
 			pos_y--;
+			moved = true;
 		}
 		if (gameentity.player_pressed_right_once()) {
 			pos_x++;
+			moved = true;
 		}
 		if (gameentity.player_pressed_left_once()) {
 			pos_x--;
+			moved = true;
 		}
 
 		check_paint_mode();
@@ -92,6 +103,12 @@ public class EditorMan : MonoBehaviour {
 
 		previous_pos_x = pos_x;
 		previous_pos_y = pos_y;
+
+		if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+			hover_maze_field = mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
+			hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
+			soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
+		}
 	}
 
 	public int init_settings_x_counter;
@@ -99,17 +116,23 @@ public class EditorMan : MonoBehaviour {
 	int settings_pos_y = 0;
 
 	void move_settings_cursor() {
+		bool moved = false;
+
 		if (gameentity.player_pressed_up_once()) {
 			settings_pos_y++;
+			moved = true;
 		}
 		if (gameentity.player_pressed_down_once()) {
 			settings_pos_y--;
+			moved = true;
 		}
 		if (gameentity.player_pressed_right_once()) {
 			settings_pos_x++;
+			moved = true;
 		}
 		if (gameentity.player_pressed_left_once()) {
 			settings_pos_x--;
+			moved = true;
 		}
 
 		if (settings_pos_x >= current_piano.notes.Count) {
@@ -117,6 +140,10 @@ public class EditorMan : MonoBehaviour {
 		}
 		if (settings_pos_x < 0) {
 			settings_pos_x = current_piano.notes.Count - 1;
+		}
+
+		if (moved) {
+			soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
 		}
 
 		menuman.highlighted_menu_item = current_piano.notes[settings_pos_x].piano_key;
@@ -196,6 +223,7 @@ public class EditorMan : MonoBehaviour {
 		if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
 
 			show_field_settings(pos_x, pos_y);
+			soundman.play_sound("instruments/piano/piano_" + editing_maze_field_script.note);
 		}
 	}
 
