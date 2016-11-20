@@ -4,6 +4,7 @@ using System.Collections;
 public class maze_field_script : MonoBehaviour {
 	public int coord_x { get; set; }
 	public int coord_y { get; set; }
+	public string note { get; set; }
 
 	public GameObject maze_wall;
 	GameObject wall_top;

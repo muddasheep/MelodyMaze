@@ -112,7 +112,7 @@ public class MenuMan : MonoBehaviour {
 
 		highlighted_menu_item = null;
 
-		menu_item_highlighter_object.transform.position = new Vector3(0, 0, -100F);
+		remove_menu_highlighter();
 
 		return highlighted_index;
 	}
@@ -145,12 +145,18 @@ public class MenuMan : MonoBehaviour {
 		highlighted_menu_item = start_menu[ highlighted_index ].my_object;
 	}
 
-	void show_highlighted_menu_item() {
+	public void remove_menu_highlighter() {
+		menu_item_highlighter_object.transform.position = new Vector3(0, 0, -100F);
+	}
+
+	public void show_highlighted_menu_item() {
 		Vector3 target_position = new Vector3(
 			highlighted_menu_item.transform.position.x,
 			highlighted_menu_item.transform.position.y,
 			highlighted_menu_item.transform.position.z - 0.3F
 		);
+
+		menu_item_highlighter_object.transform.localScale = highlighted_menu_item.transform.localScale;
 
 		Vector3 new_position = Vector3.Lerp(menu_item_highlighter_object.transform.position, target_position, Time.deltaTime * 20);
 

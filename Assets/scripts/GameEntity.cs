@@ -229,10 +229,12 @@ public class GameEntity : MonoBehaviour {
 		t = 0.0F;
 		while (t <= 1.0F) {
 			t += Time.deltaTime/seconds;
-			moving_object.transform.position = Vector3.Lerp(startpos, endpos, Mathf.SmoothStep(0.0F, 1.0F, t));
+			if (moving_object != null) {
+				moving_object.transform.position = Vector3.Lerp(startpos, endpos, Mathf.SmoothStep(0.0F, 1.0F, t));
 
-			if (moving_object == base_note_ingame) {
-				adjust_camera();
+				if (moving_object == base_note_ingame) {
+					adjust_camera();
+				}
 			}
 
 			yield return null;
@@ -595,6 +597,14 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
+	public bool player_pressed_action3() {
+		if (Input.GetButton("Fire3")) {
+			return true;
+		}
+		
+		return false;
+	}
+
 	public bool player_pressed_up() {
 		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F) {
 			return true;
@@ -676,6 +686,12 @@ public class GameEntity : MonoBehaviour {
 		bool pressed = player_pressed_action2();
 		
 		return check_and_repeat_player_button_press(pressed, "action2");
+	}
+
+	public bool player_pressed_action3_once() {
+		bool pressed = player_pressed_action3();
+		
+		return check_and_repeat_player_button_press(pressed, "action3");
 	}
 
 	public bool player_pressed_up_once() {
