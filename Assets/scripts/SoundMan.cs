@@ -6,7 +6,6 @@ public class SoundMan : MonoBehaviour {
 
 	AudioSource sound_source;
 
-
 	// Use this for initialization
 	void Start () {
 		sound_source = sounds_source.GetComponent<AudioSource>();
