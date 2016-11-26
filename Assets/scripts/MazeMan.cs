@@ -7,6 +7,7 @@ public class MazeMan : MonoBehaviour {
 	public GameObject maze_field;
 	public GameObject maze_wall;
 	public GameObject maze_note;
+    public GameObject base_note_marker;
 
 	public int maze_initialized = 0;
 
@@ -48,7 +49,21 @@ public class MazeMan : MonoBehaviour {
 		}
 	}
 	
-	public GameObject create_maze_wall (float pos_x, float pos_y) {
+    public void set_field_to_base_note(GameObject maze_field) {
+        GameObject new_base_note_marker = (GameObject)Instantiate(base_note_marker,
+            new Vector3(
+                maze_field.transform.position.x,
+                maze_field.transform.position.y,
+                maze_field.transform.position.z + 0F
+            ),
+            Quaternion.Euler(-90F, 0, 0)
+        );
+        new_base_note_marker.transform.parent = maze_field.transform;
+        maze_field_script new_maze_field_script = gameentity.get_maze_field_script_from_game_object(maze_field);
+        new_maze_field_script.is_base_note = true;
+    }
+
+    public GameObject create_maze_wall (float pos_x, float pos_y) {
 		
 		string array_index = wall_hash_index(pos_x, pos_y);
 		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
@@ -174,8 +189,10 @@ public class MazeMan : MonoBehaviour {
 			
 			maze_initialized++;
 		}
-		
-		if (maze_initialized == 4) {
+
+        set_field_to_base_note(find_or_create_field_at_coordinates(0, 0));
+
+        if (maze_initialized == 4) {
 			// draw corners
 			draw_maze_corners();
 			

@@ -5,6 +5,7 @@ public class maze_field_script : MonoBehaviour {
 	public int coord_x { get; set; }
 	public int coord_y { get; set; }
 	public string note { get; set; }
+    public bool is_base_note { get; set; }
 
 	public GameObject maze_wall;
 	GameObject wall_top;
@@ -20,21 +21,7 @@ public class maze_field_script : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		//Debug.Log("ADDING WALLS *_*");
-		/*wall_top = (GameObject)Instantiate(maze_wall, new Vector3(4.4F, -0.5F, -4.4F), Quaternion.identity);
-		wall_top.transform.parent = gameObject.transform;
-		wall_top.transform.localRotation = Quaternion.Euler (0, 0, -90F);
-		wall_top.transform.localPosition = new Vector3(0F, 0.5F, -4.4F);
-		wall_bottom = (GameObject)Instantiate(maze_wall, new Vector3(4.4F, 0.5F, -4.4F), Quaternion.identity);
-		wall_bottom.transform.parent = gameObject.transform;
-		wall_bottom.transform.localRotation = Quaternion.Euler (0, 0, -90F);
-		wall_bottom.transform.localPosition = new Vector3(0F, -0.5F, -4.4F);
-		wall_left = (GameObject)Instantiate(maze_wall, new Vector3(-0.5F, 0F, -4.4F), Quaternion.identity);
-		wall_left.transform.parent = gameObject.transform;
-		wall_left.transform.localPosition = new Vector3(-0.5F, 0F, -4.4F);
-		wall_right = (GameObject)Instantiate(maze_wall, new Vector3(0.5F, 0F, -4.4F), Quaternion.identity);
-		wall_right.transform.parent = gameObject.transform;
-		wall_right.transform.localPosition = new Vector3(0.5F, 0F, -4.4F);*/
+
 	}
 	
 	// Update is called once per frame
