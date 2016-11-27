@@ -156,9 +156,13 @@ public class MenuMan : MonoBehaviour {
 			highlighted_menu_item.transform.position.z - 0.3F
 		);
 
-		menu_item_highlighter_object.transform.localScale = highlighted_menu_item.transform.localScale;
+        menu_item_highlighter_object.transform.localScale = new Vector3(
+            highlighted_menu_item.transform.localScale.x,
+            highlighted_menu_item.transform.localScale.y,
+            menu_item_highlighter_object.transform.localScale.z
+        );
 
-		Vector3 new_position = Vector3.Lerp(menu_item_highlighter_object.transform.position, target_position, Time.deltaTime * 20);
+        Vector3 new_position = Vector3.Lerp(menu_item_highlighter_object.transform.position, target_position, Time.deltaTime * 20);
 
 		menu_item_highlighter_object.transform.position = new_position;
 	}

@@ -106,8 +106,15 @@ public class GameEntity : MonoBehaviour {
 			return;
 		}
 
+        if (!mazeman.field_at_coordinates_exists(player_coord_x, player_coord_y)) {
+            return;
+        }
+
+        GameObject hover_field = mazeman.find_or_create_field_at_coordinates(player_coord_x, player_coord_y);
+        maze_field_script hover_field_script = get_maze_field_script_from_game_object(hover_field);
+
 		if (player_pressed_action_once () &&
-			player_coord_x == 0 && player_coord_y == 0 &&
+			hover_field_script.is_base_note &&
 		    player_sphere_moving == false && base_note_reached_center == false) {
 
 			base_note_reached_center = true;
@@ -606,7 +613,8 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	public bool player_pressed_up() {
-		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F) {
+		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F
+            || Input.mouseScrollDelta.y > 0) {
 			return true;
 		}
 
@@ -614,7 +622,8 @@ public class GameEntity : MonoBehaviour {
 	}
 
 	public bool player_pressed_down() {
-		if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F) {
+		if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F
+            || Input.mouseScrollDelta.y < 0) {
 			return true;
 		}
 

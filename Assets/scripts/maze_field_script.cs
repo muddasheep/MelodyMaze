@@ -6,8 +6,10 @@ public class maze_field_script : MonoBehaviour {
 	public int coord_y { get; set; }
 	public string note { get; set; }
     public bool is_base_note { get; set; }
+    public bool is_target_note { get; set; }
+    public GameObject linked_target_note { get; set; }
 
-	public GameObject maze_wall;
+    public GameObject maze_wall;
 	GameObject wall_top;
 	GameObject wall_left;
 	GameObject wall_bottom;

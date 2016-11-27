@@ -14,8 +14,9 @@ public class MazeMan : MonoBehaviour {
 	public Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
 	public Dictionary<string,GameObject> maze_walls_coordinates_hash = new Dictionary<string,GameObject>();
 	public List<GameObject> maze_notes = new List<GameObject>();
-	
-	public bool maze_deconstruction = false;
+    public GameObject base_note;
+
+    public bool maze_deconstruction = false;
 	public List<GameObject> maze_destruction_animator = new List<GameObject>();
 
 	public GameObject create_maze_field (int col_count, int row_count) {
@@ -48,9 +49,38 @@ public class MazeMan : MonoBehaviour {
 			return create_maze_field(x, y);
 		}
 	}
-	
+
+    public void set_field_to_target_note(GameObject maze_field, maze_field_script field_script) {
+        GameObject new_note = (GameObject)Instantiate(maze_note,
+            new Vector3(
+                maze_field.transform.position.x,
+                maze_field.transform.position.y,
+                maze_field.transform.position.z - 1F
+            ), Quaternion.identity);
+
+        maze_notes.Add(new_note);
+        new_note.transform.parent = maze_field.transform;
+        field_script.is_target_note = true;
+        field_script.linked_target_note = new_note;
+
+        maze_note_script new_note_script = gameentity.get_maze_note_script_from_game_object(new_note);
+        new_note_script.coord_x = field_script.coord_x;
+        new_note_script.coord_y = field_script.coord_y;
+    }
+
+    public void remove_target_note_from_field(maze_field_script field_script) {
+        GameObject note = field_script.linked_target_note;
+        
+        if (note != null) {
+            Destroy(field_script.linked_target_note);
+            field_script.is_target_note = false;
+        }
+    }
+
     public void set_field_to_base_note(GameObject maze_field) {
-        GameObject new_base_note_marker = (GameObject)Instantiate(base_note_marker,
+        remove_base_note();
+
+        base_note = (GameObject)Instantiate(base_note_marker,
             new Vector3(
                 maze_field.transform.position.x,
                 maze_field.transform.position.y,
@@ -58,9 +88,24 @@ public class MazeMan : MonoBehaviour {
             ),
             Quaternion.Euler(-90F, 0, 0)
         );
-        new_base_note_marker.transform.parent = maze_field.transform;
+        base_note.transform.parent = maze_field.transform;
         maze_field_script new_maze_field_script = gameentity.get_maze_field_script_from_game_object(maze_field);
         new_maze_field_script.is_base_note = true;
+    }
+
+    public void remove_base_note() {
+        if (base_note != null) {
+            int base_x = Mathf.RoundToInt(base_note.transform.position.x);
+            int base_y = Mathf.RoundToInt(base_note.transform.position.y);
+
+            if (field_at_coordinates_exists(base_x, base_y)) {
+                GameObject base_note_field = find_or_create_field_at_coordinates(base_x, base_y);
+                maze_field_script base_note_script = gameentity.get_maze_field_script_from_game_object(base_note_field);
+                base_note_script.is_base_note = false;
+            }
+            Destroy(base_note);
+            base_note = null;
+        }
     }
 
     public GameObject create_maze_wall (float pos_x, float pos_y) {
@@ -178,14 +223,8 @@ public class MazeMan : MonoBehaviour {
 			int difficulty_steps = 10;
 			last_maze_field = draw_maze_tunnel(maze_initialized, 0, 0, difficulty_steps);
 			maze_field_script last_maze_field_script = gameentity.get_maze_field_script_from_game_object(last_maze_field);
-			
-			GameObject new_note = (GameObject)Instantiate(maze_note, new Vector3(last_maze_field.transform.position.x, last_maze_field.transform.position.y, last_maze_field.transform.position.z - 1F), Quaternion.identity);
-			maze_notes.Add(new_note);
-			new_note.transform.parent = last_maze_field.transform;
-			
-			maze_note_script new_note_script = gameentity.get_maze_note_script_from_game_object(new_note);
-			new_note_script.coord_x = last_maze_field_script.coord_x;
-			new_note_script.coord_y = last_maze_field_script.coord_y;
+
+            set_field_to_target_note(last_maze_field, last_maze_field_script);
 			
 			maze_initialized++;
 		}
