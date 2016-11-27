@@ -23,15 +23,19 @@ public class EditorMan : MonoBehaviour {
 	public GameObject piano_key_white_prototype;
 	public GameObject piano_key_black_prototype;
     public GameObject keyboard_button;
+    public GameObject piano_key_highlighter_prototype;
+    GameObject piano_key_highlighter;
+    public int init_settings_x_counter;
+    int settings_pos_x = 0;
+    int settings_pos_y = 0; // 0 == buttons, 1 == piano
 
-	public class Coords {
+    public class Coords {
 		public float wall_coord_x { get; set; }
 		public float wall_coord_y { get; set; }
 		public int field_coord_x { get; set; }
 		public int field_coord_y { get; set; }
 	}
 
-	// Use this for initialization
 	void Start () {
 		gameentity = GetComponent<GameEntity>();
 		mazeman    = GetComponent<MazeMan>();
@@ -39,7 +43,6 @@ public class EditorMan : MonoBehaviour {
 		soundman   = GetComponent<SoundMan>();
 	}
 	
-	// Update is called once per frame
 	void FixedUpdate () {
 		gameentity.detectPressedKeyOrButton();
 
@@ -50,31 +53,35 @@ public class EditorMan : MonoBehaviour {
 		gameentity.spawn_player_sphere(0);
 	}
 
-	public void editor_movement() {
-		if (!gameentity.player_sphere) {
-			return;
-		}
+    public void editor_movement() {
+        if (!gameentity.player_sphere) {
+            return;
+        }
 
-		if (gameentity.player_pressed_action_once()) {
-			editor_action();
-			return;
-		}
+        if (gameentity.player_pressed_action_once()) {
+            editor_action();
+            return;
+        }
 
-		if (gameentity.player_pressed_action2_once()) {
-			editor_cancel();
-			return;
-		}
+        if (gameentity.player_pressed_action2_once()) {
+            editor_cancel();
+            return;
+        }
 
-		if (gameentity.player_pressed_action3_once()) {
-			editor_settings();
-			return;
-		}
+        if (gameentity.player_pressed_action3_once()) {
+            editor_settings();
+            return;
+        }
 
-		if (editing_maze_field != null) {
-			move_settings_cursor();
-			return;
-		}
+        if (editing_maze_field != null) {
+            move_settings_cursor();
+            return;
+        }
 
+        move_field_cursor();
+    }
+
+    void move_field_cursor() {
 		float pos_z = -4.4F;
 
 		bool moved = false;
@@ -111,10 +118,6 @@ public class EditorMan : MonoBehaviour {
 			soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
 		}
 	}
-
-	public int init_settings_x_counter;
-	int settings_pos_x = 0;
-	int settings_pos_y = 0; // 0 == buttons, 1 == piano
 
 	void move_settings_cursor() {
 		bool moved = false;
@@ -365,10 +368,6 @@ public class EditorMan : MonoBehaviour {
 				delay += 0.1F;
 			}
 
-			if (note == editing_maze_field_script.note) {
-				settings_pos_x = init_settings_x_counter;
-			}
-
 			GameObject new_piano_key = (GameObject)Instantiate(key_prototype,
 				new Vector3(piano_pos_x, piano_pos_y + 8F, piano_pos_z - 15F), Quaternion.identity
 			);
@@ -379,15 +378,49 @@ public class EditorMan : MonoBehaviour {
 				active    = false
 			});
 
-			gameentity.smooth_move(new_piano_key.transform.position,
+            gameentity.smooth_move(new_piano_key.transform.position,
 				new Vector3(piano_pos_x, piano_pos_y, piano_pos_z), 0.3F, delay, new_piano_key
 			);
 
-			init_settings_x_counter++;
+            if (note == editing_maze_field_script.note) {
+                settings_pos_x = init_settings_x_counter;
+                highlight_piano_key(settings_pos_x);
+            }
+
+            init_settings_x_counter++;
 		}
 	}
 
-	void choose_field_settings() {
+    void highlight_piano_key(int x) {
+
+        if (piano_key_highlighter == null) {
+            piano_key_highlighter = (GameObject)Instantiate(piano_key_highlighter_prototype,
+                new Vector3(0, 0, 0), Quaternion.identity);
+        }
+
+        if (settings_pos_x >= current_piano.notes.Count) {
+            return;
+        }
+
+        piano_key_highlighter.transform.parent = null;
+
+        GameObject piano_key = current_piano.notes[settings_pos_x].piano_key;
+        piano_key_highlighter.transform.position = new Vector3(
+            piano_key.transform.position.x,
+            piano_key.transform.position.y,
+            piano_key.transform.position.z - 0.1F
+        );
+
+        piano_key_highlighter.transform.localScale = new Vector3(
+            piano_key.transform.localScale.x,
+            piano_key.transform.localScale.y,
+            piano_key_highlighter.transform.localScale.z
+        );
+
+        piano_key_highlighter.transform.parent = piano_key.transform;
+    }
+
+    void choose_field_settings() {
 
         if (settings_pos_y == 0) { // keyboard buttons
             // toggle active
@@ -415,9 +448,11 @@ public class EditorMan : MonoBehaviour {
                 }
             }
         }
+
         if (settings_pos_y == 1) { // piano keys
             editing_maze_field_script.note = current_piano.notes[settings_pos_x].note;
             soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
+            highlight_piano_key(settings_pos_x);
         }
 	}
 
