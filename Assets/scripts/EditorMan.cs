@@ -8,6 +8,7 @@ public class EditorMan : MonoBehaviour {
 	MazeMan mazeman;
 	MenuMan menuman;
 	SoundMan soundman;
+    StorageMan storageman;
 
 	int pos_x;
 	int pos_y;
@@ -16,9 +17,6 @@ public class EditorMan : MonoBehaviour {
 
 	GameObject editing_maze_field;
 	maze_field_script editing_maze_field_script;
-
-	GameObject hover_maze_field;
-	maze_field_script hover_maze_field_script;
 
 	public GameObject piano_key_white_prototype;
 	public GameObject piano_key_black_prototype;
@@ -41,7 +39,8 @@ public class EditorMan : MonoBehaviour {
 		mazeman    = GetComponent<MazeMan>();
 		menuman    = GetComponent<MenuMan>();
 		soundman   = GetComponent<SoundMan>();
-	}
+        storageman = GetComponent<StorageMan>();
+    }
 	
 	void FixedUpdate () {
 		gameentity.detectPressedKeyOrButton();
@@ -113,30 +112,24 @@ public class EditorMan : MonoBehaviour {
 		previous_pos_y = pos_y;
 
 		if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
-			hover_maze_field = mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
-			hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
+            maze_field_script hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
 			soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
 		}
 	}
 
 	void move_settings_cursor() {
-		bool moved = false;
 
 		if (gameentity.player_pressed_up_once()) {
 			settings_pos_y++;
-			moved = true;
 		}
 		if (gameentity.player_pressed_down_once()) {
 			settings_pos_y--;
-			moved = true;
 		}
 		if (gameentity.player_pressed_right_once()) {
 			settings_pos_x++;
-			moved = true;
 		}
 		if (gameentity.player_pressed_left_once()) {
 			settings_pos_x--;
-			moved = true;
 		}
 
         if (settings_pos_y > 1) {
@@ -513,4 +506,8 @@ public class EditorMan : MonoBehaviour {
 		new_wall_script = gameentity.get_maze_wall_script_from_game_object(new_wall);
 		new_wall_script.FadeIn();
 	}
+
+    public void save_level() {
+        storageman.save_as_json("test", 1);
+    }
 }

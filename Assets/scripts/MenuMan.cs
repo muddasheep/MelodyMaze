@@ -17,17 +17,17 @@ public class MenuMan : MonoBehaviour {
 		public bool highlighted { get; set; }
 	}
 
-	public class StartMenu {
-		public List<MenuItem> menu_items { get; set; }
-	}
+    List<MenuItem> start_menu = new List<MenuItem>();
+    List<MenuItem> pause_menu = new List<MenuItem>();
+    List<MenuItem> current_menu;
 
-	List<MenuItem> start_menu = new List<MenuItem>();
+    GameEntity gameentity;
+    EditorMan editorman;
 
-	GameEntity gameentity;
-
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
 		gameentity = GetComponent<GameEntity>();
+        editorman = GetComponent<EditorMan>();
 
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
@@ -35,10 +35,15 @@ public class MenuMan : MonoBehaviour {
 		start_menu.Add(new MenuItem { text = "Random" });
 		start_menu.Add(new MenuItem { text = "Create" });
 		start_menu.Add(new MenuItem { text = "Credits" });
-	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+        start_menu.Add(new MenuItem { text = "Exit" });
+
+        pause_menu.Add(new MenuItem { text = "Save" });
+        pause_menu.Add(new MenuItem { text = "Return to Title" });
+        pause_menu.Add(new MenuItem { text = "Exit" });
+    }
+
+    // Update is called once per frame
+    void FixedUpdate () {
 		if (!displaying_menu) {
 			return;
 		}
@@ -46,7 +51,7 @@ public class MenuMan : MonoBehaviour {
 		if (gameentity.player_pressed_action_once()) {
 			int index = destroy_menu();
 
-			MenuItem selected_item = start_menu[index];
+			MenuItem selected_item = current_menu[index];
 
 			if (selected_item.text == "Random") {
 				gameentity.start_random_game();
@@ -54,8 +59,16 @@ public class MenuMan : MonoBehaviour {
 			if (selected_item.text == "Create") {
 				gameentity.start_editor();
 			}
+            if (selected_item.text == "Save") {
+                editorman.save_level();
+            }
+            if (selected_item.text == "Exit") {
+                if (!Application.isEditor) {
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                }
+            }
 
-			displaying_menu = false;
+            displaying_menu = false;
 
 			return;
 		}
@@ -72,17 +85,26 @@ public class MenuMan : MonoBehaviour {
 		}
 	}
 
-	public void display_menu() {
+	public void display_menu(string menu) {
 
-		int index = 0;
+        if (menu == "start") {
+            current_menu = start_menu;
+        }
+        if (menu == "pause") {
+            current_menu = pause_menu;
+        }
 
-		float count_y = 0F;
+        int index = 0;
 
-		foreach (MenuItem item in start_menu) {
+		float count_y = gameentity.maze_cam.transform.position.y;
+
+		foreach (MenuItem item in current_menu) {
 
 			item.my_object = (GameObject)Instantiate(
-				menu_item, new Vector3(0, count_y, 1F), Quaternion.identity
+				menu_item, new Vector3(gameentity.maze_cam.transform.position.x, count_y, -6F), Quaternion.identity
 			);
+
+            item.highlighted = false;
 
 			menu_item_script menu_script = (menu_item_script)item.my_object.GetComponent(typeof(menu_item_script));
 
@@ -101,7 +123,7 @@ public class MenuMan : MonoBehaviour {
 		int highlighted_index = 0;
 		int index = 0;
 
-		foreach (MenuItem item in start_menu) {
+		foreach (MenuItem item in current_menu) {
 			if (item.highlighted == true) {
 				highlighted_index = index;
 			}
@@ -121,7 +143,7 @@ public class MenuMan : MonoBehaviour {
 		int highlighted_index = 0;
 		int index = 0;
 
-		foreach (MenuItem item in start_menu) {
+		foreach (MenuItem item in current_menu) {
 
 			if (item.highlighted == true) {
 				highlighted_index = index;
@@ -133,16 +155,16 @@ public class MenuMan : MonoBehaviour {
 
 		highlighted_index += increase;
 
-		if (highlighted_index >= start_menu.Count) {
+		if (highlighted_index >= current_menu.Count) {
 			highlighted_index = 0;
 		}
 
 		if (highlighted_index < 0) {
-			highlighted_index = start_menu.Count - 1;
+			highlighted_index = current_menu.Count - 1;
 		}
 
-		start_menu[ highlighted_index ].highlighted = true;
-		highlighted_menu_item = start_menu[ highlighted_index ].my_object;
+        current_menu[ highlighted_index ].highlighted = true;
+		highlighted_menu_item = current_menu[ highlighted_index ].my_object;
 	}
 
 	public void remove_menu_highlighter() {

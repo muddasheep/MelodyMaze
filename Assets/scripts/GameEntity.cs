@@ -58,37 +58,51 @@ public class GameEntity : MonoBehaviour {
 	void FixedUpdate () {
 		current_time = Time.time - start_time;
 
-		if (game_running) {
+        if (game_running) {
 
-			if (mazeman.maze_deconstruction == true) {
-				deconstruct_maze();
-			}
-			else {
+            if (mazeman.maze_deconstruction == true) {
+                deconstruct_maze();
+            }
+            else {
 
-				// move player
-				if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action_once()) {
-					base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
-					next_base_note_script.send_next_note_flying();
+                if (!menuman.displaying_menu) {
+                    // move player
+                    if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action_once()) {
+                        base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
+                        next_base_note_script.send_next_note_flying();
 
-					spawn_player_sphere(0.3F);
-					player_can_move = true;
-				}
-				else {
-					check_base_note_reach_center();
-					player_movement();
-				}
-			}
-		}
-		else if (editor_running) {
+                        spawn_player_sphere(0.3F);
+                        player_can_move = true;
+                    }
+                    else {
+                        check_base_note_reach_center();
+                        player_movement();
+                    }
+                }
 
-			editorman.editor_movement();
-		}
-		else {
-			if (menuman.displaying_menu == false) {
-				menuman.display_menu();
-				menuman.displaying_menu = true;
-			}
-		}
+                if (menuman.displaying_menu == false && player_pressed_escape()) {
+                    menuman.display_menu("pause");
+                    menuman.displaying_menu = true;
+                }
+            }
+        }
+        else if (editor_running) {
+
+            if (!menuman.displaying_menu) {
+                editorman.editor_movement();
+            }
+
+            if (menuman.displaying_menu == false && player_pressed_escape()) {
+                menuman.display_menu("pause");
+                menuman.displaying_menu = true;
+            }
+        }
+        else {
+            if (menuman.displaying_menu == false) {
+                menuman.display_menu("start");
+                menuman.displaying_menu = true;
+            }
+        }
 	}
 
 	public void start_random_game() {
@@ -588,7 +602,16 @@ public class GameEntity : MonoBehaviour {
 		return false;
 	}
 
-	public bool player_pressed_action() {
+    public bool player_pressed_escape() {
+        if (Input.GetKey(KeyCode.Escape) || Input.GetButton("Cancel")) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public bool player_pressed_action() {
 		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
 			return true;
 		}
