@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 public class StorageMan : MonoBehaviour {
 
@@ -18,12 +20,13 @@ public class StorageMan : MonoBehaviour {
      */
 
     [Serializable]
-    private class Maze {
+    public class Maze {
 
         public string level_name;
         public int level_number;
 
         public MazeField[] fields;
+        public MazeWall[] walls;
     }
 
     [Serializable]
@@ -33,6 +36,12 @@ public class StorageMan : MonoBehaviour {
         public string note;
         public bool base_note;
         public bool target_note;
+    }
+
+    [Serializable]
+    public class MazeWall {
+        public float x;
+        public float y;
     }
 
     MazeMan mazeman;
@@ -55,12 +64,11 @@ public class StorageMan : MonoBehaviour {
         maze.level_number = level_number;
 
         List<MazeField> maze_fields = new List<MazeField>();
+        List<MazeWall> maze_walls = new List<MazeWall>();
 
         foreach (KeyValuePair<int, GameObject> field in mazeman.maze_field_coordinates_hash) {
 
             maze_field_script maze_script = gameentity.get_maze_field_script_from_game_object(field.Value);
-
-            Debug.Log(field.Key);
 
             maze_fields.Add(new MazeField {
                 x = field.Value.transform.position.x,
@@ -71,10 +79,45 @@ public class StorageMan : MonoBehaviour {
             });
         }
 
+        foreach (KeyValuePair<string, GameObject> field in mazeman.maze_walls_coordinates_hash) {
+
+            maze_walls.Add(new MazeWall {
+                x = field.Value.transform.position.x,
+                y = field.Value.transform.position.y,
+            });
+        }
+
         maze.fields = maze_fields.ToArray();
+        maze.walls = maze_walls.ToArray();
 
         string json = JsonUtility.ToJson(maze);
 
-        Debug.Log(json);
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(path_to_level(level_number.ToString()));
+        bf.Serialize(file, json);
+        file.Close();
+    }
+
+    public Maze load_from_json(int level_number) {
+        Maze maze = new Maze();
+
+        if (File.Exists(path_to_level(level_number.ToString()))) {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(path_to_level(level_number.ToString()), FileMode.Open);
+            string json = (string)bf.Deserialize(file);
+            file.Close();
+
+            maze = JsonUtility.FromJson<Maze>(json);
+        }
+
+        return maze;
+    }
+
+    public string path_to_level(string level_number) {
+        return Application.dataPath + "/levels/level_" + level_number + ".json";
+    }
+
+    public bool level_file_exists(int level_number) {
+        return File.Exists(path_to_level(level_number.ToString()));
     }
 }

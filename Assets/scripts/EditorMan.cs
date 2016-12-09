@@ -4,22 +4,22 @@ using System.Collections.Generic;
 
 public class EditorMan : MonoBehaviour {
 
-	GameEntity gameentity;
-	MazeMan mazeman;
-	MenuMan menuman;
-	SoundMan soundman;
+    GameEntity gameentity;
+    MazeMan mazeman;
+    MenuMan menuman;
+    SoundMan soundman;
     StorageMan storageman;
 
-	int pos_x;
-	int pos_y;
-	int previous_pos_x;
-	int previous_pos_y;
+    int pos_x;
+    int pos_y;
+    int previous_pos_x;
+    int previous_pos_y;
 
-	GameObject editing_maze_field;
-	maze_field_script editing_maze_field_script;
+    GameObject editing_maze_field;
+    maze_field_script editing_maze_field_script;
 
-	public GameObject piano_key_white_prototype;
-	public GameObject piano_key_black_prototype;
+    public GameObject piano_key_white_prototype;
+    public GameObject piano_key_black_prototype;
     public GameObject keyboard_button;
     public GameObject piano_key_highlighter_prototype;
     GameObject piano_key_highlighter;
@@ -28,29 +28,29 @@ public class EditorMan : MonoBehaviour {
     int settings_pos_y = 0; // 0 == buttons, 1 == piano
 
     public class Coords {
-		public float wall_coord_x { get; set; }
-		public float wall_coord_y { get; set; }
-		public int field_coord_x { get; set; }
-		public int field_coord_y { get; set; }
-	}
+        public float wall_coord_x { get; set; }
+        public float wall_coord_y { get; set; }
+        public int field_coord_x { get; set; }
+        public int field_coord_y { get; set; }
+    }
 
-	void Start () {
-		gameentity = GetComponent<GameEntity>();
-		mazeman    = GetComponent<MazeMan>();
-		menuman    = GetComponent<MenuMan>();
-		soundman   = GetComponent<SoundMan>();
+    void Start() {
+        gameentity = GetComponent<GameEntity>();
+        mazeman = GetComponent<MazeMan>();
+        menuman = GetComponent<MenuMan>();
+        soundman = GetComponent<SoundMan>();
         storageman = GetComponent<StorageMan>();
     }
-	
-	void FixedUpdate () {
-		gameentity.detectPressedKeyOrButton();
 
-		gameentity.center_camera_within_maze_bounds();
-	}
-	
-	public void prepare_editor() {
-		gameentity.spawn_player_sphere(0);
-	}
+    void FixedUpdate() {
+        gameentity.detectPressedKeyOrButton();
+
+        gameentity.center_camera_within_maze_bounds();
+    }
+
+    public void prepare_editor() {
+        gameentity.spawn_player_sphere(0);
+    }
 
     public void editor_movement() {
         if (!gameentity.player_sphere) {
@@ -81,56 +81,56 @@ public class EditorMan : MonoBehaviour {
     }
 
     void move_field_cursor() {
-		float pos_z = -4.4F;
+        float pos_z = -4.4F;
 
-		bool moved = false;
+        bool moved = false;
 
-		if (gameentity.player_pressed_up_once()) {
-			pos_y++;
-			moved = true;
-		}
-		if (gameentity.player_pressed_down_once()) {
-			pos_y--;
-			moved = true;
-		}
-		if (gameentity.player_pressed_right_once()) {
-			pos_x++;
-			moved = true;
-		}
-		if (gameentity.player_pressed_left_once()) {
-			pos_x--;
-			moved = true;
-		}
+        if (gameentity.player_pressed_up_once()) {
+            pos_y++;
+            moved = true;
+        }
+        if (gameentity.player_pressed_down_once()) {
+            pos_y--;
+            moved = true;
+        }
+        if (gameentity.player_pressed_right_once()) {
+            pos_x++;
+            moved = true;
+        }
+        if (gameentity.player_pressed_left_once()) {
+            pos_x--;
+            moved = true;
+        }
 
-		check_paint_mode();
+        check_paint_mode();
 
-		Vector3 new_position = new Vector3(pos_x, pos_y, pos_z);
+        Vector3 new_position = new Vector3(pos_x, pos_y, pos_z);
 
-		gameentity.player_sphere.transform.position = new_position;
+        gameentity.player_sphere.transform.position = new_position;
 
-		previous_pos_x = pos_x;
-		previous_pos_y = pos_y;
+        previous_pos_x = pos_x;
+        previous_pos_y = pos_y;
 
-		if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+        if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
             maze_field_script hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
-			soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
-		}
-	}
+            soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
+        }
+    }
 
-	void move_settings_cursor() {
+    void move_settings_cursor() {
 
-		if (gameentity.player_pressed_up_once()) {
-			settings_pos_y++;
-		}
-		if (gameentity.player_pressed_down_once()) {
-			settings_pos_y--;
-		}
-		if (gameentity.player_pressed_right_once()) {
-			settings_pos_x++;
-		}
-		if (gameentity.player_pressed_left_once()) {
-			settings_pos_x--;
-		}
+        if (gameentity.player_pressed_up_once()) {
+            settings_pos_y++;
+        }
+        if (gameentity.player_pressed_down_once()) {
+            settings_pos_y--;
+        }
+        if (gameentity.player_pressed_right_once()) {
+            settings_pos_x++;
+        }
+        if (gameentity.player_pressed_left_once()) {
+            settings_pos_x--;
+        }
 
         if (settings_pos_y > 1) {
             settings_pos_y = 0;
@@ -161,95 +161,95 @@ public class EditorMan : MonoBehaviour {
             menuman.highlighted_menu_item = current_piano.notes[settings_pos_x].piano_key;
         }
 
-		menuman.show_highlighted_menu_item();
-	}
+        menuman.show_highlighted_menu_item();
+    }
 
-	void check_paint_mode() {
-		// paint mode! if player kept pressing action, destroy wall between last and this one and call editor_action()
-		if (gameentity.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
-			editor_action();
-			if (pos_x < previous_pos_x) {
-				mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
-			}
-			if (pos_x > previous_pos_x) {
-				mazeman.destroy_wall_at_coordinates(pos_x - 0.5F, pos_y);
-			}
-			if (pos_y < previous_pos_y) {
-				mazeman.destroy_wall_at_coordinates(pos_x, pos_y + 0.5F);
-			}
-			if (pos_y > previous_pos_y) {
-				mazeman.destroy_wall_at_coordinates(pos_x, pos_y - 0.5F);
-			}
-		}
-	}
+    void check_paint_mode() {
+        // paint mode! if player kept pressing action, destroy wall between last and this one and call editor_action()
+        if (gameentity.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
+            editor_action();
+            if (pos_x < previous_pos_x) {
+                mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
+            }
+            if (pos_x > previous_pos_x) {
+                mazeman.destroy_wall_at_coordinates(pos_x - 0.5F, pos_y);
+            }
+            if (pos_y < previous_pos_y) {
+                mazeman.destroy_wall_at_coordinates(pos_x, pos_y + 0.5F);
+            }
+            if (pos_y > previous_pos_y) {
+                mazeman.destroy_wall_at_coordinates(pos_x, pos_y - 0.5F);
+            }
+        }
+    }
 
-	void editor_action() {
-		// choose currently selected settings
-		if (editing_maze_field != null) {
-			choose_field_settings();
-			return;
-		}
-		
-		// if no field at current pos, create field
-		if (!mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
-			mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
+    void editor_action() {
+        // choose currently selected settings
+        if (editing_maze_field != null) {
+            choose_field_settings();
+            return;
+        }
 
-			// add 4 walls
-			foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
-				create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
-			}
-		}
-	}
+        // if no field at current pos, create field
+        if (!mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+            mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
 
-	void editor_cancel() {
-		// hide settings if settings are active
-		if (editing_maze_field != null) {
-			hide_field_settings();
-			return;
-		}
+            // add 4 walls
+            foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
+                create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+            }
+        }
+    }
 
-		// if field at current pos, destroy field
-		if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
-			mazeman.destroy_field_at_coordinates(pos_x, pos_y);
-			editing_maze_field = null;
-			editing_maze_field_script = null;
+    void editor_cancel() {
+        // hide settings if settings are active
+        if (editing_maze_field != null) {
+            hide_field_settings();
+            return;
+        }
 
-			// add walls if adjecent fields exist, remove walls if fields don't exist
-			foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
+        // if field at current pos, destroy field
+        if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+            mazeman.destroy_field_at_coordinates(pos_x, pos_y);
+            editing_maze_field = null;
+            editing_maze_field_script = null;
 
-				if(mazeman.field_at_coordinates_exists(coords.field_coord_x, coords.field_coord_y)) {
-					create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
-				}
-				else {
-					mazeman.destroy_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
-				}
-			}
-		}
-	}
+            // add walls if adjecent fields exist, remove walls if fields don't exist
+            foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
 
-	void editor_settings() {
-		// if we're already editing, ignore this
-		if (editing_maze_field != null) {
-			return;
-		}
+                if (mazeman.field_at_coordinates_exists(coords.field_coord_x, coords.field_coord_y)) {
+                    create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+                }
+                else {
+                    mazeman.destroy_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+                }
+            }
+        }
+    }
 
-		// if field at current pos, show settings
-		if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
+    void editor_settings() {
+        // if we're already editing, ignore this
+        if (editing_maze_field != null) {
+            return;
+        }
 
-			show_field_settings(pos_x, pos_y);
-			soundman.play_sound("instruments/piano/piano_" + editing_maze_field_script.note);
-		}
-	}
+        // if field at current pos, show settings
+        if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
 
-	public class Piano {
-		public List<PianoNote> notes = new List<PianoNote>();
-	}
+            show_field_settings(pos_x, pos_y);
+            soundman.play_sound("instruments/piano/piano_" + editing_maze_field_script.note);
+        }
+    }
 
-	public class PianoNote {
-		public string note { get; set; }
-		public GameObject piano_key { get; set; }
-		public bool active { get; set; }
-	}
+    public class Piano {
+        public List<PianoNote> notes = new List<PianoNote>();
+    }
+
+    public class PianoNote {
+        public string note { get; set; }
+        public GameObject piano_key { get; set; }
+        public bool active { get; set; }
+    }
 
     public class KeyboardButtons {
         public List<KeyboardButton> buttons = new List<KeyboardButton>();
@@ -261,16 +261,16 @@ public class EditorMan : MonoBehaviour {
     }
 
     public List<string> notes = new List<string> {
-		"c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h",
-		"c2", "cis2", "d2", "dis2", "e2", "f2", "fis2", "g2", "gis2", "a2", "b2", "h2",
-		"c3"
-	};
+        "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h",
+        "c2", "cis2", "d2", "dis2", "e2", "f2", "fis2", "g2", "gis2", "a2", "b2", "h2",
+        "c3"
+    };
 
-	public List<string> instruments = new List<string> {
-		"piano"
-	};
+    public List<string> instruments = new List<string> {
+        "piano"
+    };
 
-	Piano current_piano;
+    Piano current_piano;
     KeyboardButtons current_keyboard_buttons;
 
     void show_field_settings(float x, float y) {
@@ -310,7 +310,7 @@ public class EditorMan : MonoBehaviour {
         );
         current_keyboard_buttons.buttons.Add(new KeyboardButton {
             button_script = new_button.GetComponent<keyboard_button_script>(),
-            text          = "Target Note"
+            text = "Target Note"
         });
         if (editing_maze_field_script.is_target_note) {
             current_keyboard_buttons.buttons[1].button_script.turn_on();
@@ -323,57 +323,57 @@ public class EditorMan : MonoBehaviour {
     }
 
     void build_piano(float x, float y) {
-		// build piano
-		current_piano = new Piano();
+        // build piano
+        current_piano = new Piano();
 
-		float piano_white_x = x - 5F;
-		float piano_white_y = y;
-		float piano_white_z = -5F;
-		float piano_pos_x = piano_white_x;
-		float piano_pos_y = piano_white_y;
-		float piano_pos_z = piano_white_z;
-		init_settings_x_counter = 0;
+        float piano_white_x = x - 5F;
+        float piano_white_y = y;
+        float piano_white_z = -5F;
+        float piano_pos_x = piano_white_x;
+        float piano_pos_y = piano_white_y;
+        float piano_pos_z = piano_white_z;
+        init_settings_x_counter = 0;
 
-		foreach (string note in notes) {
-			GameObject key_prototype = piano_key_white_prototype;
+        foreach (string note in notes) {
+            GameObject key_prototype = piano_key_white_prototype;
 
-			bool white = true;
+            bool white = true;
 
-			if (note.Contains("b") || note.Contains("is")) {
-				key_prototype = piano_key_black_prototype;
-				white = false;
-			}
-			else {
-				piano_white_x += 0.6F;
-			}
+            if (note.Contains("b") || note.Contains("is")) {
+                key_prototype = piano_key_black_prototype;
+                white = false;
+            }
+            else {
+                piano_white_x += 0.6F;
+            }
 
-			float delay = init_settings_x_counter*0.01F;
+            float delay = init_settings_x_counter * 0.01F;
 
-			if (white) {
-				piano_pos_x = piano_white_x;
-				piano_pos_y = piano_white_y;
-				piano_pos_z = piano_white_z;
-			}
-			else {
-				piano_pos_x = piano_pos_x   + 0.30F;
-				piano_pos_y = piano_white_y + 0.74F;
-				piano_pos_z = piano_white_z - 0.1F;
-				delay += 0.1F;
-			}
+            if (white) {
+                piano_pos_x = piano_white_x;
+                piano_pos_y = piano_white_y;
+                piano_pos_z = piano_white_z;
+            }
+            else {
+                piano_pos_x = piano_pos_x + 0.30F;
+                piano_pos_y = piano_white_y + 0.74F;
+                piano_pos_z = piano_white_z - 0.1F;
+                delay += 0.1F;
+            }
 
-			GameObject new_piano_key = (GameObject)Instantiate(key_prototype,
-				new Vector3(piano_pos_x, piano_pos_y + 8F, piano_pos_z - 15F), Quaternion.identity
-			);
+            GameObject new_piano_key = (GameObject)Instantiate(key_prototype,
+                new Vector3(piano_pos_x, piano_pos_y + 8F, piano_pos_z - 15F), Quaternion.identity
+            );
 
-			current_piano.notes.Add(new PianoNote {
-				note 	  = note,
-				piano_key = new_piano_key,
-				active    = false
-			});
+            current_piano.notes.Add(new PianoNote {
+                note = note,
+                piano_key = new_piano_key,
+                active = false
+            });
 
             gameentity.smooth_move(new_piano_key.transform.position,
-				new Vector3(piano_pos_x, piano_pos_y, piano_pos_z), 0.3F, delay, new_piano_key
-			);
+                new Vector3(piano_pos_x, piano_pos_y, piano_pos_z), 0.3F, delay, new_piano_key
+            );
 
             if (note == editing_maze_field_script.note) {
                 settings_pos_x = init_settings_x_counter;
@@ -381,8 +381,8 @@ public class EditorMan : MonoBehaviour {
             }
 
             init_settings_x_counter++;
-		}
-	}
+        }
+    }
 
     void highlight_piano_key(int x) {
 
@@ -447,18 +447,18 @@ public class EditorMan : MonoBehaviour {
             soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
             highlight_piano_key(settings_pos_x);
         }
-	}
+    }
 
-	void hide_field_settings() {
-		// destroy piano and buttons
+    void hide_field_settings() {
+        // destroy piano and buttons
 
-		if (current_piano == null) {
-			return;
-		}
+        if (current_piano == null) {
+            return;
+        }
 
-		foreach(PianoNote note in current_piano.notes) {
-			Destroy (note.piano_key);
-		}
+        foreach (PianoNote note in current_piano.notes) {
+            Destroy(note.piano_key);
+        }
 
         foreach (KeyboardButton button in current_keyboard_buttons.buttons) {
             Destroy(button.button_script.gameObject);
@@ -466,48 +466,83 @@ public class EditorMan : MonoBehaviour {
 
         current_piano = null;
         current_keyboard_buttons = null;
-		editing_maze_field = null;
-		editing_maze_field_script = null;
+        editing_maze_field = null;
+        editing_maze_field_script = null;
 
-		menuman.remove_menu_highlighter();
-	}
+        menuman.remove_menu_highlighter();
+    }
 
-	public List<Coords> find_coordinates_around_pos(float x, float y) {
-		List<Coords> coordinates = new List<Coords>();
+    public List<Coords> find_coordinates_around_pos(float x, float y) {
+        List<Coords> coordinates = new List<Coords>();
 
-		coordinates.Add(new Coords {
-			wall_coord_x  = x + 0.5F, wall_coord_y  = y,
-			field_coord_x = Mathf.RoundToInt(x + 1F), field_coord_y = Mathf.RoundToInt(y)
-		});
+        coordinates.Add(new Coords {
+            wall_coord_x = x + 0.5F, wall_coord_y = y,
+            field_coord_x = Mathf.RoundToInt(x + 1F), field_coord_y = Mathf.RoundToInt(y)
+        });
 
-		coordinates.Add(new Coords {
-			wall_coord_x  = x - 0.5F, wall_coord_y  = y,
-			field_coord_x = Mathf.RoundToInt(x - 1F), field_coord_y = Mathf.RoundToInt(y)
-		});
+        coordinates.Add(new Coords {
+            wall_coord_x = x - 0.5F, wall_coord_y = y,
+            field_coord_x = Mathf.RoundToInt(x - 1F), field_coord_y = Mathf.RoundToInt(y)
+        });
 
-		coordinates.Add(new Coords {
-			wall_coord_x  = x, wall_coord_y  = y + 0.5F,
-			field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y + 1F)
-		});
+        coordinates.Add(new Coords {
+            wall_coord_x = x, wall_coord_y = y + 0.5F,
+            field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y + 1F)
+        });
 
-		coordinates.Add(new Coords {
-			wall_coord_x  = x, wall_coord_y  = y - 0.5F,
-			field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y - 1F)
-		});
+        coordinates.Add(new Coords {
+            wall_coord_x = x, wall_coord_y = y - 0.5F,
+            field_coord_x = Mathf.RoundToInt(x), field_coord_y = Mathf.RoundToInt(y - 1F)
+        });
 
-		return coordinates;
-	}
+        return coordinates;
+    }
 
-	void create_editor_wall_at_coordinates(float x, float y) {
-		GameObject new_wall;
-		maze_wall_script new_wall_script;
+    void create_editor_wall_at_coordinates(float x, float y) {
+        GameObject new_wall;
+        maze_wall_script new_wall_script;
 
-		new_wall = mazeman.find_or_create_wall_at_coordinates(x, y);
-		new_wall_script = gameentity.get_maze_wall_script_from_game_object(new_wall);
-		new_wall_script.FadeIn();
-	}
+        new_wall = mazeman.find_or_create_wall_at_coordinates(x, y);
+        new_wall_script = gameentity.get_maze_wall_script_from_game_object(new_wall);
+        new_wall_script.FadeIn();
+    }
 
     public void save_level() {
         storageman.save_as_json("test", 1);
+    }
+
+    public void load_level(int level_number) {
+        if (level_file_exists(level_number)) {
+           StorageMan.Maze maze = storageman.load_from_json(level_number);
+           build_maze_from_maze_class(maze);
+        }
+    }
+
+    void build_maze_from_maze_class(StorageMan.Maze maze) {
+        mazeman.clean_maze();
+
+        foreach (StorageMan.MazeWall maze_wall in maze.walls) {
+            create_editor_wall_at_coordinates(maze_wall.x, maze_wall.y);
+        }
+
+        foreach (StorageMan.MazeField maze_field in maze.fields) {
+            GameObject new_field = mazeman.find_or_create_field_at_coordinates(Mathf.RoundToInt(maze_field.x), Mathf.RoundToInt(maze_field.y));
+
+            maze_field_script field_script = gameentity.get_maze_field_script_from_game_object(new_field);
+
+            if (maze_field.base_note) {
+                mazeman.set_field_to_base_note(new_field);
+            }
+            if (maze_field.target_note) {
+                mazeman.set_field_to_target_note(new_field, field_script);
+            }
+
+            field_script.note = maze_field.note;
+        }
+    }
+
+
+    public bool level_file_exists(int level_number) {
+        return storageman.level_file_exists(level_number);
     }
 }

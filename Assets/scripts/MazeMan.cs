@@ -240,7 +240,34 @@ public class MazeMan : MonoBehaviour {
 		}
 	}
 
-	public void highlight_walls_around_maze_field(maze_field_script given_maze_field, bool fadeout) {
+    public void clean_maze() {
+
+        List<EditorMan.Coords> to_delete = new List<EditorMan.Coords>();
+
+        foreach (KeyValuePair<int, GameObject> field in maze_field_coordinates_hash) {
+            to_delete.Add(new EditorMan.Coords {
+                field_coord_x = Mathf.RoundToInt(field.Value.transform.position.x),
+                field_coord_y = Mathf.RoundToInt(field.Value.transform.position.y)
+            });
+        }
+        foreach (EditorMan.Coords coords in to_delete) {
+            destroy_field_at_coordinates(coords.field_coord_x, coords.field_coord_y);
+        }
+
+        to_delete = new List<EditorMan.Coords>();
+
+        foreach (KeyValuePair<string, GameObject> field in maze_walls_coordinates_hash) {
+            to_delete.Add(new EditorMan.Coords {
+                wall_coord_x = field.Value.transform.position.x,
+                wall_coord_y = field.Value.transform.position.y
+            });
+        }
+        foreach (EditorMan.Coords coords in to_delete) {
+            destroy_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
+        }
+    }
+
+    public void highlight_walls_around_maze_field(maze_field_script given_maze_field, bool fadeout) {
 		float start_x = given_maze_field.coord_x;
 		float start_y = given_maze_field.coord_y;
 		
@@ -403,10 +430,10 @@ public class MazeMan : MonoBehaviour {
 
 		if (field_at_coordinates_exists(int_x, int_y)) {
 			GameObject found_field = find_or_create_field_at_coordinates(int_x, int_y);
-			maze_field_coordinates_hash.Remove(coordinates_to_array_index(int_x, int_y));
-			Destroy(found_field);
-			update_maze_boundaries();
-		}
+            maze_field_coordinates_hash.Remove(coordinates_to_array_index(int_x, int_y));
+            Destroy(found_field);
+            update_maze_boundaries();
+        }
 	}
 
 	GameObject draw_maze_tunnel(int current_direction, int start_x, int start_y, int steps) {

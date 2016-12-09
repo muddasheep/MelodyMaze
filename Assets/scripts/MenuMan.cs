@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 public class MenuMan : MonoBehaviour {
 
@@ -19,6 +20,7 @@ public class MenuMan : MonoBehaviour {
 
     List<MenuItem> start_menu = new List<MenuItem>();
     List<MenuItem> pause_menu = new List<MenuItem>();
+    List<MenuItem> load_menu  = new List<MenuItem>();
     List<MenuItem> current_menu;
 
     GameEntity gameentity;
@@ -38,6 +40,7 @@ public class MenuMan : MonoBehaviour {
         start_menu.Add(new MenuItem { text = "Exit" });
 
         pause_menu.Add(new MenuItem { text = "Save" });
+        pause_menu.Add(new MenuItem { text = "Load" });
         pause_menu.Add(new MenuItem { text = "Return to Title" });
         pause_menu.Add(new MenuItem { text = "Exit" });
     }
@@ -61,6 +64,13 @@ public class MenuMan : MonoBehaviour {
 			}
             if (selected_item.text == "Save") {
                 editorman.save_level();
+            }
+            if (selected_item.text == "Load") {
+                display_menu("load");
+                return;
+            }
+            if (selected_item.text.IndexOf("Level ") > -1) {
+                editorman.load_level(index + 1);
             }
             if (selected_item.text == "Exit") {
                 if (!Application.isEditor) {
@@ -93,6 +103,10 @@ public class MenuMan : MonoBehaviour {
         if (menu == "pause") {
             current_menu = pause_menu;
         }
+        if (menu == "load") {
+            update_load_menu();
+            current_menu = load_menu;
+        }
 
         int index = 0;
 
@@ -118,6 +132,17 @@ public class MenuMan : MonoBehaviour {
 			count_y -= 1F;
 		}
 	}
+
+    void update_load_menu() {
+        int level_count = 1;
+
+        load_menu = new List<MenuItem>();
+
+        while (editorman.level_file_exists(level_count)) {
+            load_menu.Add(new MenuItem { text = "Level " + level_count.ToString() });
+            level_count++;
+        }
+    }
 
 	public int destroy_menu() {
 		int highlighted_index = 0;
