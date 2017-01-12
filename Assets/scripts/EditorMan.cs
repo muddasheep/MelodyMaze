@@ -27,6 +27,8 @@ public class EditorMan : MonoBehaviour {
     int settings_pos_x = 0;
     int settings_pos_y = 0; // 0 == buttons, 1 == piano
 
+    public int current_level = 1;
+
     public class Coords {
         public float wall_coord_x { get; set; }
         public float wall_coord_y { get; set; }
@@ -507,12 +509,29 @@ public class EditorMan : MonoBehaviour {
         new_wall_script.FadeIn();
     }
 
+    public void increase_current_level() {
+        current_level++;
+
+        if (current_level > 99) {
+            current_level = 1;
+        }
+    }
+
+    public void decrease_current_level() {
+        current_level--;
+
+        if (current_level < 1) {
+            current_level = 99;
+        }
+    }
+
     public void save_level() {
-        storageman.save_as_json("test", 1);
+        storageman.save_as_json("test", current_level);
     }
 
     public void load_level(int level_number) {
         if (level_file_exists(level_number)) {
+            current_level = level_number;
            StorageMan.Maze maze = storageman.load_from_json(level_number);
            build_maze_from_maze_class(maze);
         }
@@ -540,7 +559,6 @@ public class EditorMan : MonoBehaviour {
             field_script.note = maze_field.note;
         }
     }
-
 
     public bool level_file_exists(int level_number) {
         return storageman.level_file_exists(level_number);

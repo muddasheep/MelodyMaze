@@ -14,13 +14,15 @@ public class MenuMan : MonoBehaviour {
 
 	public class MenuItem {
 		public string text { get; set; }
-		public GameObject my_object { get; set; }
+        public string value { get; set; }
+        public GameObject my_object { get; set; }
 		public bool highlighted { get; set; }
 	}
 
     List<MenuItem> start_menu = new List<MenuItem>();
     List<MenuItem> pause_menu = new List<MenuItem>();
     List<MenuItem> load_menu  = new List<MenuItem>();
+    List<MenuItem> save_menu = new List<MenuItem>();
     List<MenuItem> current_menu;
 
     GameEntity gameentity;
@@ -43,6 +45,7 @@ public class MenuMan : MonoBehaviour {
         pause_menu.Add(new MenuItem { text = "Load" });
         pause_menu.Add(new MenuItem { text = "Return to Title" });
         pause_menu.Add(new MenuItem { text = "Exit" });
+
     }
 
     // Update is called once per frame
@@ -62,15 +65,35 @@ public class MenuMan : MonoBehaviour {
 			if (selected_item.text == "Create") {
 				gameentity.start_editor();
 			}
+
             if (selected_item.text == "Save") {
+                display_menu("save");
+                return;
+            }
+            if (selected_item.text.IndexOf(" + ") > -1) {
+                editorman.increase_current_level();
+                display_menu("save");
+                return;
+            }
+            if (selected_item.text.IndexOf(" - ") > -1) {
+                editorman.decrease_current_level();
+                display_menu("save", 2);
+                return;
+            }
+            if (selected_item.text.IndexOf("Level #") > -1) {
+                // do nothing
+                return;
+            }
+            if (selected_item.text == "Save Level") {
                 editorman.save_level();
             }
+
             if (selected_item.text == "Load") {
                 display_menu("load");
                 return;
             }
-            if (selected_item.text.IndexOf("Level ") > -1) {
-                editorman.load_level(index + 1);
+            if (selected_item.text.IndexOf("Level ") > -1 && selected_item.text.IndexOf("Save Level") == -1) {
+                editorman.load_level(int.Parse(selected_item.value));
             }
             if (selected_item.text == "Exit") {
                 if (!Application.isEditor) {
@@ -95,13 +118,17 @@ public class MenuMan : MonoBehaviour {
 		}
 	}
 
-	public void display_menu(string menu) {
+	public void display_menu(string menu, int highlight_index = 0) {
 
         if (menu == "start") {
             current_menu = start_menu;
         }
         if (menu == "pause") {
             current_menu = pause_menu;
+        }
+        if (menu == "save") {
+            update_save_menu();
+            current_menu = save_menu;
         }
         if (menu == "load") {
             update_load_menu();
@@ -124,8 +151,9 @@ public class MenuMan : MonoBehaviour {
 
 			menu_script.menu_text.text = item.text;
 
-			if (index == 0) {
+			if (index == highlight_index) {
 				highlighted_menu_item = item.my_object;
+                item.highlighted = true;
 			}
 
 			index++;
@@ -133,18 +161,31 @@ public class MenuMan : MonoBehaviour {
 		}
 	}
 
+    void update_save_menu() {
+        int active_level = editorman.current_level;
+
+        save_menu = new List<MenuItem>();
+
+        save_menu.Add(new MenuItem { text = " + " });
+        save_menu.Add(new MenuItem { text = "Level #: " + active_level });
+        save_menu.Add(new MenuItem { text = " - " });
+        save_menu.Add(new MenuItem { text = "Save Level" });
+    }
+
     void update_load_menu() {
         int level_count = 1;
 
         load_menu = new List<MenuItem>();
 
-        while (editorman.level_file_exists(level_count)) {
-            load_menu.Add(new MenuItem { text = "Level " + level_count.ToString() });
+        while (level_count <= 99) {
+            if (editorman.level_file_exists(level_count)) {
+                load_menu.Add(new MenuItem { text = "Level " + level_count.ToString(), value = level_count.ToString() });
+            }
             level_count++;
         }
     }
 
-	public int destroy_menu() {
+    public int destroy_menu() {
 		int highlighted_index = 0;
 		int index = 0;
 
