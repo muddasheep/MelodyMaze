@@ -99,19 +99,58 @@ public class GameEntity : MonoBehaviour {
         }
         else {
             if (menuman.displaying_menu == false) {
+                show_title_screen();
                 menuman.display_menu("start");
                 menuman.displaying_menu = true;
+            }
+
+            int title_coord_x = Mathf.RoundToInt(player_sphere.transform.position.x);
+            int title_coord_y = Mathf.RoundToInt(player_sphere.transform.position.y);
+
+            if (mazeman.field_at_coordinates_exists(title_coord_x - 1, title_coord_y)) {
+                mazeman.highlight_walls_around_maze_field(get_maze_field_script(title_coord_x - 1 , title_coord_y), true);
+            }
+
+            if (mazeman.field_at_coordinates_exists(title_coord_x, title_coord_y)) {
+                mazeman.highlight_walls_around_maze_field(get_maze_field_script(title_coord_x, title_coord_y), false);
             }
         }
 	}
 
+    public void destroy_title_screen() {
+        Destroy(player_sphere);
+
+        mazeman.clean_maze();
+
+        StopAllCoroutines();
+    }
+
+    public void show_title_screen() {
+        int count = -5;
+
+        List<string> mm_title = new List<string> { "M", "E", "L", "O", "D", "Y", " ", "M", "A", "Z", "E" };
+
+        while (count <= 5) {
+            menuman.create_text_at_coordinates(count, 2F, -4.6F, mm_title[ count + 5 ], mazeman.create_maze_field(count, 2));
+            mazeman.create_maze_wall(count, 2.5F, false);
+            mazeman.create_maze_wall(count, 1.5F, false);
+            count++;
+        }
+
+        summon_player_sphere();
+        player_sphere.transform.position = new Vector3(-9F, 2F, -4.6F);
+        smooth_move(player_sphere.transform.position, new Vector3(9F, 2F, -4.6F), 5F, 0.5F, player_sphere);
+    }
+
 	public void start_random_game() {
-		mazeman.build_maze();
+        destroy_title_screen();
+        mazeman.build_maze();
 		game_running = true;
 	}
 	
 	public void start_editor() {
-		editorman.prepare_editor();
+        destroy_title_screen();
+        editorman.prepare_editor();
 		editor_running = true;
 	}
 	
@@ -150,7 +189,7 @@ public class GameEntity : MonoBehaviour {
 
 	public void center_camera_within_maze_bounds() {
 
-		if (!player_sphere) {
+		if (!player_sphere || player_spheres == 0) {
 			return;
 		}
 
@@ -757,11 +796,7 @@ public class GameEntity : MonoBehaviour {
 			yield return null;
 		}
 
-		player_sphere = (GameObject)Instantiate(
-			player_sphere_prefab,
-			new Vector3(0, 0, -44.3F),
-			Quaternion.identity
-		);
+        summon_player_sphere();
 
 		player_sphere_moving = true;
 		player_target_position = new Vector3(0F, 0.0F, -4.3F);
@@ -773,4 +808,12 @@ public class GameEntity : MonoBehaviour {
 		StartCoroutine(spawn_player_sphere_routine(delay_seconds));
 		player_spheres++;
 	}
+
+    public void summon_player_sphere() {
+        player_sphere = (GameObject)Instantiate(
+            player_sphere_prefab,
+            new Vector3(0, 0, -44.3F),
+            Quaternion.identity
+        );
+    }
 }

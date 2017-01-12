@@ -93,21 +93,20 @@ public class maze_wall_script : MonoBehaviour {
 		
 	}
 
-	public void FadeIn ()
-	{
-		FadeIn (fadeTime); 
+	public void FadeIn (float fade_time = 0.5F) {
+        FadeInRoutine(fade_time); 
 	}
 	
-	public void FadeOut () {
-		FadeOut (fadeTime); 		
+	public void FadeOut (float fade_time = 0.5F) {
+        FadeOutRoutine(fade_time);
 	}
 	
-	void FadeIn (float newFadeTime) {
+	void FadeInRoutine (float newFadeTime) {
 		StopAllCoroutines(); 
 		StartCoroutine("FadeSequence", newFadeTime); 
 	}
 	
-	void FadeOut (float newFadeTime) {
+	void FadeOutRoutine (float newFadeTime) {
 		StopAllCoroutines(); 
 		StartCoroutine("FadeSequence", -newFadeTime); 
 	}

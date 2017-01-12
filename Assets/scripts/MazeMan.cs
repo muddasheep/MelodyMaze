@@ -108,7 +108,7 @@ public class MazeMan : MonoBehaviour {
         }
     }
 
-    public GameObject create_maze_wall (float pos_x, float pos_y) {
+    public GameObject create_maze_wall (float pos_x, float pos_y, bool stay_visible = false) {
 		
 		string array_index = wall_hash_index(pos_x, pos_y);
 		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
@@ -119,8 +119,10 @@ public class MazeMan : MonoBehaviour {
 			new_maze_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
 		}
 
-		maze_wall_script next_maze_wall_script = gameentity.get_maze_wall_script_from_game_object(new_maze_wall);
-		next_maze_wall_script.FadeOut();
+        if (!stay_visible) {
+            maze_wall_script next_maze_wall_script = gameentity.get_maze_wall_script_from_game_object(new_maze_wall);
+            next_maze_wall_script.FadeOut(0F);
+        }
 		
 		return new_maze_wall;
 	}

@@ -8,7 +8,8 @@ public class MenuMan : MonoBehaviour {
 	public bool displaying_menu = false;
 	public GameObject menu_item;
 	public GameObject menu_item_highlighter;
-	public GameObject highlighted_menu_item;
+    public GameObject title_text_beholder;
+    public GameObject highlighted_menu_item;
 
 	GameObject menu_item_highlighter_object;
 
@@ -254,4 +255,15 @@ public class MenuMan : MonoBehaviour {
 
 		menu_item_highlighter_object.transform.position = new_position;
 	}
+
+    public GameObject create_text_at_coordinates(float x, float y, float z, string text, GameObject parent) {
+        GameObject summoned_title_text = (GameObject)Instantiate(title_text_beholder, new Vector3(x, y, z), Quaternion.identity);
+
+        TextMesh summoned_title_text_mesh = summoned_title_text.GetComponentInChildren<TextMesh>();
+        summoned_title_text_mesh.text = text;
+
+        summoned_title_text.transform.parent = parent.transform;
+
+        return summoned_title_text;
+    }
 }
