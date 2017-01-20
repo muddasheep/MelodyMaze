@@ -45,9 +45,11 @@ public class EditorMan : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        gameentity.detectPressedKeyOrButton();
+        if (gameentity.editor_running && !menuman.displaying_menu) {
+            gameentity.detectPressedKeyOrButton();
 
-        gameentity.center_camera_within_maze_bounds();
+            gameentity.center_camera_within_maze_bounds();
+        }
     }
 
     public void prepare_editor() {

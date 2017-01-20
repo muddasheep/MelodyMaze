@@ -243,6 +243,12 @@ public class MazeMan : MonoBehaviour {
 	}
 
     public void clean_maze() {
+        remove_base_note();
+
+        foreach (GameObject note in maze_notes) {
+            Destroy(note);
+        }
+        maze_notes = new List<GameObject>();
 
         List<EditorMan.Coords> to_delete = new List<EditorMan.Coords>();
 

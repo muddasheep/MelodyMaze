@@ -41,6 +41,7 @@ public class base_note_script : MonoBehaviour {
 				current_base_note.transform.position = new_position;
 			}
 			else {
+                Destroy(current_base_note);
 				current_base_note = null;
 			}
 		}

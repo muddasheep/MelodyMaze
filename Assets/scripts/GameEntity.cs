@@ -10,7 +10,9 @@ public class GameEntity : MonoBehaviour {
 	public GameObject base_note;
 	public Camera maze_cam;
 
-	bool base_note_reached_center = false;
+    Vector3 initial_cam_position;
+
+    public bool base_note_reached_center = false;
 	public GameObject base_note_ingame;
 	public GameObject player_sphere;
 	int collected_notes = 0;
@@ -19,12 +21,12 @@ public class GameEntity : MonoBehaviour {
 	public int player_coord_y = 0;
 	Vector3 player_target_position;
 	bool player_sphere_moving = false;
-	bool player_can_move = true;
+	public bool player_can_move = true;
 	float base_note_speed_x = 0F;
 	float base_note_speed_y = 0F;
 
-	bool game_running = false;
-	bool editor_running = false;
+	public bool game_running = false;
+    public bool editor_running = false;
 
 	public class TakenPath {
 		public int coord_x { get; set; }
@@ -51,7 +53,9 @@ public class GameEntity : MonoBehaviour {
 		menuman   = GetComponent<MenuMan>();
 		editorman = GetComponent<EditorMan>();
 
-		start_time = Time.time;
+        initial_cam_position = maze_cam.transform.position;
+
+        start_time = Time.time;
 	}
 
 	// Update is called once per frame
@@ -153,8 +157,37 @@ public class GameEntity : MonoBehaviour {
         editorman.prepare_editor();
 		editor_running = true;
 	}
-	
-	void check_base_note_reach_center() {
+
+    public void return_to_title() {
+        game_running = false;
+        editor_running = false;
+        player_sphere_moving = false;
+        menuman.displaying_menu = false;
+        base_note_reached_center = false;
+        player_can_move = true;
+        mazeman.maze_initialized = 0;
+        collected_notes = 0;
+        player_spheres = 0;
+
+        player_saved_path_coordinates = new List<TakenPath>();
+        player_saved_paths = new List<TakenPaths>();
+
+        if (player_sphere) {
+            Destroy(player_sphere);
+            player_sphere = null;
+        }
+        if (base_note_ingame) {
+            Destroy(base_note_ingame);
+            base_note_ingame = null;
+        }
+
+        mazeman.clean_maze();
+        reset_camera();
+
+        StopAllCoroutines();
+    }
+
+    void check_base_note_reach_center() {
 		if (!player_sphere) {
 			return;
 		}
@@ -166,7 +199,7 @@ public class GameEntity : MonoBehaviour {
         GameObject hover_field = mazeman.find_or_create_field_at_coordinates(player_coord_x, player_coord_y);
         maze_field_script hover_field_script = get_maze_field_script_from_game_object(hover_field);
 
-		if (player_pressed_action_once () &&
+        if (player_pressed_action_once () &&
 			hover_field_script.is_base_note &&
 		    player_sphere_moving == false && base_note_reached_center == false) {
 
@@ -186,6 +219,11 @@ public class GameEntity : MonoBehaviour {
 		}
 		maze_cam.transform.position = new Vector3(player_sphere.transform.position.x, player_sphere.transform.position.y, -20.8F);
 	}
+
+    public void reset_camera() {
+
+        maze_cam.transform.position = initial_cam_position;
+    }
 
 	public void center_camera_within_maze_bounds() {
 

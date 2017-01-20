@@ -55,6 +55,14 @@ public class MenuMan : MonoBehaviour {
 			return;
 		}
 
+        if (gameentity.player_pressed_action2_once()) {
+            destroy_menu();
+
+            displaying_menu = false;
+
+            return;
+        }
+
 		if (gameentity.player_pressed_action_once()) {
 			int index = destroy_menu();
 
@@ -96,6 +104,11 @@ public class MenuMan : MonoBehaviour {
             if (selected_item.text.IndexOf("Level ") > -1 && selected_item.text.IndexOf("Save Level") == -1) {
                 editorman.load_level(int.Parse(selected_item.value));
             }
+
+            if (selected_item.text == "Return to Title") {
+                gameentity.return_to_title();
+            }
+
             if (selected_item.text == "Exit") {
                 if (!Application.isEditor) {
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
@@ -120,6 +133,7 @@ public class MenuMan : MonoBehaviour {
 	}
 
 	public void display_menu(string menu, int highlight_index = 0) {
+        gameentity.reset_camera();
 
         if (menu == "start") {
             current_menu = start_menu;
