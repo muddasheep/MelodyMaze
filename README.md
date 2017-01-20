@@ -10,4 +10,4 @@ This game is developed in Unity (Personal Edition).
 This game is not done yet. But it will be done in the future.
 
 ## Thanks
-Thank you: Auri, Khimitsu, Flo, H4ndy, Michael, Jazz, Pao, Mantis, Szaladin, Lexi.
+Thank you: Auri, Khimitsu, Flo, H4ndy, Jazz, Michael, Mantis, Szaladin, Lex, Pao, Kim, Moonlyer.
