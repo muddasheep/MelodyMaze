@@ -388,6 +388,12 @@ public class EditorMan : MonoBehaviour {
         }
     }
 
+    void delight_piano_keys() {
+        if (piano_key_highlighter != null) {
+            Destroy(piano_key_highlighter);
+        }
+    }
+
     void highlight_piano_key(int x) {
 
         if (piano_key_highlighter == null) {
@@ -447,9 +453,15 @@ public class EditorMan : MonoBehaviour {
         }
 
         if (settings_pos_y == 1) { // piano keys
-            editing_maze_field_script.note = current_piano.notes[settings_pos_x].note;
-            soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
-            highlight_piano_key(settings_pos_x);
+            if (editing_maze_field_script.note == current_piano.notes[settings_pos_x].note) {
+                editing_maze_field_script.remove_note();
+                delight_piano_keys();
+            }
+            else {
+                editing_maze_field_script.save_note(current_piano.notes[settings_pos_x].note);
+                soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
+                highlight_piano_key(settings_pos_x);
+            }
         }
     }
 
@@ -558,7 +570,7 @@ public class EditorMan : MonoBehaviour {
                 mazeman.set_field_to_target_note(new_field, field_script);
             }
 
-            field_script.note = maze_field.note;
+            field_script.save_note(maze_field.note);
         }
     }
 

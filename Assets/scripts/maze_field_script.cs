@@ -4,11 +4,13 @@ using System.Collections;
 public class maze_field_script : MonoBehaviour {
 	public int coord_x { get; set; }
 	public int coord_y { get; set; }
-	public string note { get; set; }
+    public string note { get; set; }
     public bool is_base_note { get; set; }
     public bool is_target_note { get; set; }
     public GameObject linked_target_note { get; set; }
 
+    public GameObject note_sprite;
+    GameObject note_indicator;
     public GameObject maze_wall;
 	GameObject wall_top;
 	GameObject wall_left;
@@ -111,4 +113,27 @@ public class maze_field_script : MonoBehaviour {
 			yield return null;
 		}
 	}
+
+    public void save_note(string new_note) {
+        note = new_note;
+
+        if (new_note == null || new_note == "") {
+            return;
+        }
+
+        if (note_indicator == null) {
+            note_indicator = (GameObject)Instantiate(note_sprite, new Vector3(0, 0, 0), Quaternion.identity);
+        }
+
+        note_indicator.transform.parent = gameObject.transform;
+        note_indicator.transform.localPosition = new Vector3(0, 0, -4.5F);
+    }
+
+    public void remove_note() {
+        note = null;
+
+        Destroy(note_indicator);
+
+        note_indicator = null;
+    }
 }
