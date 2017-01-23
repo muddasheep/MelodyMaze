@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Assets\scripts\EditorMan.cs" />
     <Compile Include="Assets\scripts\GameEntity.cs" />
+    <Compile Include="Assets\scripts\InputMan.cs" />
     <Compile Include="Assets\scripts\MazeMan.cs" />
     <Compile Include="Assets\scripts\MenuMan.cs" />
     <Compile Include="Assets\scripts\SoundMan.cs" />

@@ -42,6 +42,7 @@ public class GameEntity : MonoBehaviour {
 	List<TakenPath> player_saved_path_coordinates = new List<TakenPath>();
 	List<TakenPaths> player_saved_paths = new List<TakenPaths>();
 
+    InputMan inputman;
 	MazeMan mazeman;
 	MenuMan menuman;
 	EditorMan editorman;
@@ -49,7 +50,8 @@ public class GameEntity : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		mazeman   = GetComponent<MazeMan>();
+        inputman  = GetComponent<InputMan>();
+        mazeman   = GetComponent<MazeMan>();
 		menuman   = GetComponent<MenuMan>();
 		editorman = GetComponent<EditorMan>();
 
@@ -71,7 +73,7 @@ public class GameEntity : MonoBehaviour {
 
                 if (!menuman.displaying_menu) {
                     // move player
-                    if (player_spheres == 0 && base_note_reached_center == true && player_pressed_action_once()) {
+                    if (player_spheres == 0 && base_note_reached_center == true && inputman.player_pressed_action_once()) {
                         base_note_script next_base_note_script = get_base_note_script_from_game_object(base_note_ingame);
                         next_base_note_script.send_next_note_flying();
 
@@ -84,7 +86,7 @@ public class GameEntity : MonoBehaviour {
                     }
                 }
 
-                if (menuman.displaying_menu == false && player_pressed_escape()) {
+                if (menuman.displaying_menu == false && inputman.player_pressed_escape()) {
                     menuman.display_menu("pause");
                     menuman.displaying_menu = true;
                 }
@@ -96,7 +98,7 @@ public class GameEntity : MonoBehaviour {
                 editorman.editor_movement();
             }
 
-            if (menuman.displaying_menu == false && player_pressed_escape()) {
+            if (menuman.displaying_menu == false && inputman.player_pressed_escape()) {
                 menuman.display_menu("pause");
                 menuman.displaying_menu = true;
             }
@@ -199,7 +201,7 @@ public class GameEntity : MonoBehaviour {
         GameObject hover_field = mazeman.find_or_create_field_at_coordinates(player_coord_x, player_coord_y);
         maze_field_script hover_field_script = get_maze_field_script_from_game_object(hover_field);
 
-        if (player_pressed_action_once () &&
+        if (inputman.player_pressed_action_once () &&
 			hover_field_script.is_base_note &&
 		    player_sphere_moving == false && base_note_reached_center == false) {
 
@@ -459,19 +461,19 @@ public class GameEntity : MonoBehaviour {
 		bool pressed_x = false;
 		bool pressed_y = false;
 
-		if (player_pressed_up()) {
+		if (inputman.player_pressed_up()) {
 			base_note_speed_y += 0.001F;
 			pressed_y = true;
 		}
-		if (player_pressed_down()) {
+		if (inputman.player_pressed_down()) {
 			base_note_speed_y -= 0.001F;
 			pressed_y = true;
 		}
-		if (player_pressed_left()) {
+		if (inputman.player_pressed_left()) {
 			base_note_speed_x -= 0.001F;
 			pressed_x = true;
 		}
-		if (player_pressed_right()) {
+		if (inputman.player_pressed_right()) {
 			base_note_speed_x += 0.001F;
 			pressed_x = true;
 		}
@@ -576,7 +578,9 @@ public class GameEntity : MonoBehaviour {
 		if (player_sphere_moving == true) {
 			bool direction_pressed = false;
 			if (player_sphere.transform.position.z >= -4.3F) {
-				if (player_pressed_right() || player_pressed_left() || player_pressed_down() || player_pressed_up()) {
+				if (inputman.player_pressed_right() || inputman.player_pressed_left()
+                    || inputman.player_pressed_down() || inputman.player_pressed_up()) {
+
 					direction_pressed = true;
 				}
 			}
@@ -613,28 +617,28 @@ public class GameEntity : MonoBehaviour {
 			maze_field_script current_maze_field = get_maze_field_script(player_coord_x, player_coord_y);
 			bool direction_pressed = false;
 			
-			if (player_pressed_right()) {
+			if (inputman.player_pressed_right()) {
 				if (current_maze_field.removed_right() == true) {
 					player_coord_x++;
 					player_sphere_moving = true;
 					direction_pressed = true;
 				}
 			}
-			if (player_pressed_down() && !player_sphere_moving) {
+			if (inputman.player_pressed_down() && !player_sphere_moving) {
 				if (current_maze_field.removed_bottom() == true) {
 					player_coord_y--;
 					player_sphere_moving = true;
 					direction_pressed = true;
 				}
 			}
-			if (player_pressed_up() && !player_sphere_moving) {
+			if (inputman.player_pressed_up() && !player_sphere_moving) {
 				if (current_maze_field.removed_top() == true) {
 					player_coord_y++;
 					player_sphere_moving = true;
 					direction_pressed = true;
 				}
 			}
-			if (player_pressed_left() && !player_sphere_moving) {
+			if (inputman.player_pressed_left() && !player_sphere_moving) {
 				if (current_maze_field.removed_left() == true) {
 					player_coord_x--;
 					player_sphere_moving = true;
@@ -654,177 +658,6 @@ public class GameEntity : MonoBehaviour {
 				mazeman.highlight_walls_around_maze_field(next_maze_field, false);
 			}
 		}
-	}
-
-	public void detectPressedKeyOrButton() {
-		foreach(KeyCode kcode in System.Enum.GetValues(typeof(KeyCode))) {
-			if (Input.GetKeyDown(kcode))
-				Debug.Log("KeyCode down: " + kcode);
-		}
-	}
-
-	public bool player_action_button_down = false;
-
-	public bool player_pressed_action_once() {
-		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
-			if (player_action_button_down == false) {
-				player_action_button_down = true;
-				return true;
-			}
-		}
-		else {
-			player_action_button_down = false;
-		}
-
-		return false;
-	}
-
-    public bool player_pressed_escape() {
-        if (Input.GetKey(KeyCode.Escape) || Input.GetButton("Cancel")) {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    public bool player_pressed_action() {
-		if (Input.GetKey (KeyCode.Space) || Input.GetButton("Fire1")) {
-			return true;
-		}
-		
-		return false;
-	}
-
-	public bool player_pressed_action2() {
-		if (Input.GetKey (KeyCode.Delete) || Input.GetButton("Fire2")) {
-			return true;
-		}
-		
-		return false;
-	}
-
-	public bool player_pressed_action3() {
-		if (Input.GetButton("Fire3")) {
-			return true;
-		}
-		
-		return false;
-	}
-
-	public bool player_pressed_up() {
-		if (Input.GetKey (KeyCode.UpArrow) || Input.GetAxis("Vertical") > 0.1F
-            || Input.mouseScrollDelta.y > 0) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public bool player_pressed_down() {
-		if (Input.GetKey (KeyCode.DownArrow) || Input.GetAxis("Vertical") < -0.1F
-            || Input.mouseScrollDelta.y < 0) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public bool player_pressed_right() {
-		if (Input.GetKey (KeyCode.RightArrow) || Input.GetAxis("Horizontal") > 0.1F) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public bool player_pressed_left() {
-		if (Input.GetKey (KeyCode.LeftArrow) || Input.GetAxis("Horizontal") < -0.1F) {
-			return true;
-		}
-
-		return false;
-	}
-
-	bool repeated_once = false;
-	Dictionary<string,IEnumerator> player_button_press_coroutines = new Dictionary<string,IEnumerator>();
-	Dictionary<string,bool> player_button_pressed_down_once = new Dictionary<string,bool>();
-
-	private IEnumerator player_button_press_coroutine;
-	public IEnumerator player_press_button_repeat(float waitTime, string direction) {
-		yield return new WaitForSeconds(waitTime);
-
-		player_button_pressed_down_once[direction] = false;
-
-		repeated_once = true;
-	}
-
-	bool check_and_repeat_player_button_press(bool pressed, string direction) {
-		if (pressed) {
-			bool player_button_down;
-			player_button_pressed_down_once.TryGetValue(direction, out player_button_down);
-			if (player_button_down != true) {
-				player_button_pressed_down_once[direction] = true;
-				
-				if (repeated_once == false) {
-					player_button_press_coroutines[direction] = player_press_button_repeat(0.3F, direction);
-				}
-				else {
-					player_button_press_coroutines[direction] = player_press_button_repeat(0.1F, direction);
-				}
-				StartCoroutine(player_button_press_coroutines[direction]);
-				
-				return true;
-			}
-		}
-		else {
-			IEnumerator coroutine_for_direction;
-			player_button_press_coroutines.TryGetValue(direction, out coroutine_for_direction);
-			if (coroutine_for_direction != null) {
-				StopCoroutine(coroutine_for_direction);
-				player_button_press_coroutines[direction] = null;
-				repeated_once = false;
-			}
-			player_button_pressed_down_once[direction] = false;
-		}
-		
-		return false;
-	}
-
-	public bool player_pressed_action2_once() {
-		bool pressed = player_pressed_action2();
-		
-		return check_and_repeat_player_button_press(pressed, "action2");
-	}
-
-	public bool player_pressed_action3_once() {
-		bool pressed = player_pressed_action3();
-		
-		return check_and_repeat_player_button_press(pressed, "action3");
-	}
-
-	public bool player_pressed_up_once() {
-		bool pressed = player_pressed_up();
-
-		return check_and_repeat_player_button_press(pressed, "up");
-	}
-
-	public bool player_pressed_down_once() {
-		bool pressed = player_pressed_down();
-		
-		return check_and_repeat_player_button_press(pressed, "down");
-	}
-
-	public bool player_pressed_left_once() {
-		bool pressed = player_pressed_left();
-
-		return check_and_repeat_player_button_press(pressed, "left");
-	}
-
-	public bool player_pressed_right_once() {
-		bool pressed = player_pressed_right();
-		
-		return check_and_repeat_player_button_press(pressed, "right");
 	}
 
 	IEnumerator spawn_player_sphere_routine(float delay_seconds) {

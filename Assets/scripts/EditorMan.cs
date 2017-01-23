@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class EditorMan : MonoBehaviour {
 
+    InputMan inputman;
     GameEntity gameentity;
     MazeMan mazeman;
     MenuMan menuman;
@@ -38,6 +39,7 @@ public class EditorMan : MonoBehaviour {
 
     void Start() {
         gameentity = GetComponent<GameEntity>();
+        inputman = GetComponent<InputMan>();
         mazeman = GetComponent<MazeMan>();
         menuman = GetComponent<MenuMan>();
         soundman = GetComponent<SoundMan>();
@@ -46,7 +48,7 @@ public class EditorMan : MonoBehaviour {
 
     void FixedUpdate() {
         if (gameentity.editor_running && !menuman.displaying_menu) {
-            gameentity.detectPressedKeyOrButton();
+            inputman.detectPressedKeyOrButton();
 
             gameentity.center_camera_within_maze_bounds();
         }
@@ -61,17 +63,17 @@ public class EditorMan : MonoBehaviour {
             return;
         }
 
-        if (gameentity.player_pressed_action_once()) {
+        if (inputman.player_pressed_action_once()) {
             editor_action();
             return;
         }
 
-        if (gameentity.player_pressed_action2_once()) {
+        if (inputman.player_pressed_action2_once()) {
             editor_cancel();
             return;
         }
 
-        if (gameentity.player_pressed_action3_once()) {
+        if (inputman.player_pressed_action3_once()) {
             editor_settings();
             return;
         }
@@ -89,19 +91,19 @@ public class EditorMan : MonoBehaviour {
 
         bool moved = false;
 
-        if (gameentity.player_pressed_up_once()) {
+        if (inputman.player_pressed_up_once()) {
             pos_y++;
             moved = true;
         }
-        if (gameentity.player_pressed_down_once()) {
+        if (inputman.player_pressed_down_once()) {
             pos_y--;
             moved = true;
         }
-        if (gameentity.player_pressed_right_once()) {
+        if (inputman.player_pressed_right_once()) {
             pos_x++;
             moved = true;
         }
-        if (gameentity.player_pressed_left_once()) {
+        if (inputman.player_pressed_left_once()) {
             pos_x--;
             moved = true;
         }
@@ -123,16 +125,16 @@ public class EditorMan : MonoBehaviour {
 
     void move_settings_cursor() {
 
-        if (gameentity.player_pressed_up_once()) {
+        if (inputman.player_pressed_up_once()) {
             settings_pos_y++;
         }
-        if (gameentity.player_pressed_down_once()) {
+        if (inputman.player_pressed_down_once()) {
             settings_pos_y--;
         }
-        if (gameentity.player_pressed_right_once()) {
+        if (inputman.player_pressed_right_once()) {
             settings_pos_x++;
         }
-        if (gameentity.player_pressed_left_once()) {
+        if (inputman.player_pressed_left_once()) {
             settings_pos_x--;
         }
 
@@ -170,7 +172,7 @@ public class EditorMan : MonoBehaviour {
 
     void check_paint_mode() {
         // paint mode! if player kept pressing action, destroy wall between last and this one and call editor_action()
-        if (gameentity.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
+        if (inputman.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
             editor_action();
             if (pos_x < previous_pos_x) {
                 mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);

@@ -27,12 +27,14 @@ public class MenuMan : MonoBehaviour {
     List<MenuItem> current_menu;
 
     GameEntity gameentity;
+    InputMan inputman;
     EditorMan editorman;
 
     // Use this for initialization
     void Start () {
 		gameentity = GetComponent<GameEntity>();
         editorman = GetComponent<EditorMan>();
+        inputman = GetComponent<InputMan>();
 
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
@@ -55,7 +57,7 @@ public class MenuMan : MonoBehaviour {
 			return;
 		}
 
-        if (gameentity.player_pressed_action2_once()) {
+        if (inputman.player_pressed_action2_once()) {
             destroy_menu();
 
             displaying_menu = false;
@@ -63,7 +65,7 @@ public class MenuMan : MonoBehaviour {
             return;
         }
 
-		if (gameentity.player_pressed_action_once()) {
+		if (inputman.player_pressed_action_once()) {
 			int index = destroy_menu();
 
 			MenuItem selected_item = current_menu[index];
@@ -123,10 +125,10 @@ public class MenuMan : MonoBehaviour {
 		if (highlighted_menu_item) {
 			show_highlighted_menu_item();
 
-			if (gameentity.player_pressed_down_once()) {
+			if (inputman.player_pressed_down_once()) {
 				highlight_next_menu_item(1);
 			}
-			if (gameentity.player_pressed_up_once()) {
+			if (inputman.player_pressed_up_once()) {
 				highlight_next_menu_item(-1);
 			}
 		}
