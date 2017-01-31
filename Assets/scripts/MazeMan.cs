@@ -162,12 +162,14 @@ public class MazeMan : MonoBehaviour {
 	}
 
 	public void quake_from_current_position(float delay) {
-		
+
+        Vector3 player_coordinates = gameentity.get_current_player_coordinates();
+
 		int radius = 4;
-		int walk_x = gameentity.player_coord_x - radius;
-		int walk_y = gameentity.player_coord_x - radius;
-		int max_x  = gameentity.player_coord_x + radius;
-		int max_y  = gameentity.player_coord_y + radius;
+		int walk_x = (int)player_coordinates.x - radius;
+		int walk_y = (int)player_coordinates.x - radius;
+		int max_x  = (int)player_coordinates.x + radius;
+		int max_y  = (int)player_coordinates.y + radius;
 		
 		while (walk_y < max_y) {
 			
@@ -176,8 +178,8 @@ public class MazeMan : MonoBehaviour {
 				maze_field_script gotten_maze_script = gameentity.get_maze_field_script_from_game_object(maze_field_target);
 				
 				// delay = max difference to player_coord
-				int diff_x = Mathf.Abs(walk_x - gameentity.player_coord_x);
-				int diff_y = Mathf.Abs(walk_y - gameentity.player_coord_y);
+				int diff_x = Mathf.Abs(walk_x - (int)player_coordinates.x);
+				int diff_y = Mathf.Abs(walk_y - (int)player_coordinates.y);
 				
 				gotten_maze_script.quake(1F, delay + (Mathf.Max(diff_x + diff_y) / 5F));
 			}
@@ -185,7 +187,7 @@ public class MazeMan : MonoBehaviour {
 			walk_x++;
 			
 			if (walk_x > max_x) {
-				walk_x = gameentity.player_coord_x - radius;
+				walk_x = (int)player_coordinates.x - radius;
 				walk_y++;
 			}
 		}
@@ -375,20 +377,13 @@ public class MazeMan : MonoBehaviour {
 				col_count = lowest_x;
 				row_count++;
 			}
-			
-			// place base note
-			gameentity.base_note_ingame = (GameObject)Instantiate(
-				gameentity.base_note, new Vector3(
-					last_created_tunnel.transform.position.x,
-					last_created_tunnel.transform.position.y,
-					last_created_tunnel.transform.position.z - 1F
-				), Quaternion.identity
-			);
-			gameentity.base_note_ingame.transform.Rotate(270F, 0F, 0F);
-			gameentity.player_sphere = gameentity.base_note_ingame;
-			gameentity.player_coord_x = (int)last_created_tunnel.transform.position.x;
-			gameentity.player_coord_y = (int)last_created_tunnel.transform.position.y;
-			gameentity.adjust_camera();
+
+            // place base note
+            gameentity.summon_base_note(new Vector3(
+                last_created_tunnel.transform.position.x,
+                last_created_tunnel.transform.position.y,
+                last_created_tunnel.transform.position.z - 1F
+            ));
 			
 			maze_initialized++;
 		}

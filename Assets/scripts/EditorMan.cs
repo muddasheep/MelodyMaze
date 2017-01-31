@@ -55,11 +55,11 @@ public class EditorMan : MonoBehaviour {
     }
 
     public void prepare_editor() {
-        gameentity.spawn_player_sphere(0);
+        gameentity.camera_target = gameentity.summon_player_sphere();
     }
 
     public void editor_movement() {
-        if (!gameentity.player_sphere) {
+        if (!gameentity.camera_target) {
             return;
         }
 
@@ -112,7 +112,7 @@ public class EditorMan : MonoBehaviour {
 
         Vector3 new_position = new Vector3(pos_x, pos_y, pos_z);
 
-        gameentity.player_sphere.transform.position = new_position;
+        gameentity.camera_target.transform.position = new_position;
 
         previous_pos_x = pos_x;
         previous_pos_y = pos_y;
