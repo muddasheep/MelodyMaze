@@ -48,8 +48,8 @@ public class GameEntity : MonoBehaviour {
             public int redrawn_counter = 0;
         }
 
-        List<TakenPath> player_saved_path_coordinates = new List<TakenPath>();
-        List<TakenPaths> player_saved_paths = new List<TakenPaths>();
+        public List<TakenPath> player_saved_path_coordinates = new List<TakenPath>();
+        public List<TakenPaths> player_saved_paths = new List<TakenPaths>();
 
         public void game_update() {
 
@@ -405,6 +405,57 @@ public class GameEntity : MonoBehaviour {
 
             return y;
         }
+
+        int maze_path_redraw_rate_counter = 0;
+        public void deconstruct_maze() {
+            if (player_saved_paths.Count > 0) {
+                if (maze_path_redraw_rate_counter < 2) {
+                    maze_path_redraw_rate_counter++;
+                }
+                else {
+                    // redraw paths
+                    List<TakenPaths> player_saved_paths_altered = new List<TakenPaths>();
+
+                    foreach (TakenPaths path in player_saved_paths) {
+                        if (path.redrawn_counter < path.taken_path.Count) {
+                            TakenPath current_path = path.taken_path[path.redrawn_counter];
+
+                            GameObject redrawing_maze_field = mazeman.find_or_create_field_at_coordinates(
+                                current_path.coord_x, current_path.coord_y
+                            );
+
+                            GameObject redrawn_field = (GameObject)Instantiate(
+                                gameentity.redrawing_field,
+                                new Vector3(
+                                    redrawing_maze_field.transform.position.x,
+                                    redrawing_maze_field.transform.position.y,
+                                    redrawing_maze_field.transform.position.z - 1F
+                                ),
+                                Quaternion.identity
+                            );
+                            redrawn_field.transform.parent = redrawing_maze_field.transform;
+
+                            path.redrawn_counter++;
+                            player_saved_paths_altered.Add(path);
+                        }
+                    }
+                    player_saved_paths = player_saved_paths_altered;
+                    maze_path_redraw_rate_counter = 0;
+                }
+            }
+            else {
+                if (maze_path_redraw_rate_counter < 4) {
+                    maze_path_redraw_rate_counter++;
+                }
+                else {
+
+                    maze_path_redraw_rate_counter = 0;
+                }
+
+                mazeman.animate_maze_destruction();
+            }
+        }
+
     }
 
     InputMan inputman;
@@ -433,7 +484,7 @@ public class GameEntity : MonoBehaviour {
         if (game_running) {
 
             if (mazeman.maze_deconstruction == true) {
-                deconstruct_maze();
+                gamemaster.deconstruct_maze();
             }
             else {
 
@@ -562,48 +613,7 @@ public class GameEntity : MonoBehaviour {
         return camera_target.transform.position;
     }
 
-
-    public int maze_path_redraw_rate_counter = 0;
-	public GameObject redrawing_field;
-	void deconstruct_maze() {
-        /*
-		if (player_saved_paths.Count > 0) {
-			if (maze_path_redraw_rate_counter < 2) {
-				maze_path_redraw_rate_counter++;
-			}
-			else {
-				// redraw paths
-				List<TakenPaths> player_saved_paths_altered = new List<TakenPaths>();
-				
-				foreach (TakenPaths path in player_saved_paths) {
-					if (path.redrawn_counter < path.taken_path.Count) {
-						TakenPath current_path = path.taken_path[ path.redrawn_counter ];
-						
-						GameObject redrawing_maze_field = mazeman.find_or_create_field_at_coordinates(current_path.coord_x, current_path.coord_y);
-						
-						GameObject redrawn_field = (GameObject)Instantiate(redrawing_field, new Vector3(redrawing_maze_field.transform.position.x, redrawing_maze_field.transform.position.y, redrawing_maze_field.transform.position.z - 1F), Quaternion.identity);
-						redrawn_field.transform.parent = redrawing_maze_field.transform;
-						
-						path.redrawn_counter++;
-						player_saved_paths_altered.Add(path);
-					}
-				}
-				player_saved_paths = player_saved_paths_altered;
-				maze_path_redraw_rate_counter = 0;
-			}
-		}
-		else {
-			if (maze_path_redraw_rate_counter < 4) {
-				maze_path_redraw_rate_counter++;
-			}
-			else {
-
-				maze_path_redraw_rate_counter = 0;
-			}
-			
-			mazeman.animate_maze_destruction();
-		}*/
-	}
+    public GameObject redrawing_field;
 
 	public Vector3 get_random_offscreen_position(float target_z) {
 		float target_x = Random.Range(-16F, 16F);

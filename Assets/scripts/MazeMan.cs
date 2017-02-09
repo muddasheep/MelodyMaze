@@ -4,51 +4,49 @@ using System.Collections.Generic;
 
 public class MazeMan : MonoBehaviour {
 
-	public GameObject maze_field;
-	public GameObject maze_wall;
-	public GameObject maze_note;
+    public GameObject maze_field;
+    public GameObject maze_wall;
+    public GameObject maze_note;
     public GameObject base_note_marker;
 
-	public int maze_initialized = 0;
+    public int maze_initialized = 0;
 
-	public Dictionary<int,GameObject> maze_field_coordinates_hash = new Dictionary<int,GameObject>();
-	public Dictionary<string,GameObject> maze_walls_coordinates_hash = new Dictionary<string,GameObject>();
-	public List<GameObject> maze_notes = new List<GameObject>();
+    public Dictionary<int, GameObject> maze_field_coordinates_hash = new Dictionary<int, GameObject>();
+    public Dictionary<string, GameObject> maze_walls_coordinates_hash = new Dictionary<string, GameObject>();
+    public List<GameObject> maze_notes = new List<GameObject>();
     public GameObject base_note;
 
     public bool maze_deconstruction = false;
-	public List<GameObject> maze_destruction_animator = new List<GameObject>();
 
-	public GameObject create_maze_field (int col_count, int row_count) {
-		
-		int pos_x = col_count;// - 7;
-		int pos_y = row_count;// - 4;
-		
-		GameObject new_maze_field = (GameObject)Instantiate(maze_field, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
-		maze_field_script new_maze_field_script = gameentity.get_maze_field_script_from_game_object(new_maze_field);
-		new_maze_field_script.coord_x = col_count;
-		new_maze_field_script.coord_y = row_count;
-		maze_field_coordinates_hash.Add (coordinates_to_array_index(col_count, row_count), new_maze_field);
-		//maze_field_coordinates.Insert(coordinates_to_array_index(col_count, row_count), new_maze_field);
+    public GameObject create_maze_field(int col_count, int row_count) {
 
-		update_maze_boundaries();
+        int pos_x = col_count;// - 7;
+        int pos_y = row_count;// - 4;
 
-		return new_maze_field;
-	}
-	
-	public GameObject find_or_create_field_at_coordinates (int x, int y) {
-		
-		int array_index = coordinates_to_array_index(x, y);
-		
-		if (maze_field_coordinates_hash.ContainsKey(array_index)) {
-			
-			return maze_field_coordinates_hash[array_index];
-		}
-		else {
-			
-			return create_maze_field(x, y);
-		}
-	}
+        GameObject new_maze_field = (GameObject)Instantiate(maze_field, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
+        maze_field_script new_maze_field_script = gameentity.get_maze_field_script_from_game_object(new_maze_field);
+        new_maze_field_script.coord_x = col_count;
+        new_maze_field_script.coord_y = row_count;
+        maze_field_coordinates_hash.Add(coordinates_to_array_index(col_count, row_count), new_maze_field);
+
+        update_maze_boundaries();
+
+        return new_maze_field;
+    }
+
+    public GameObject find_or_create_field_at_coordinates(int x, int y) {
+
+        int array_index = coordinates_to_array_index(x, y);
+
+        if (maze_field_coordinates_hash.ContainsKey(array_index)) {
+
+            return maze_field_coordinates_hash[array_index];
+        }
+        else {
+
+            return create_maze_field(x, y);
+        }
+    }
 
     public void set_field_to_target_note(GameObject maze_field, maze_field_script field_script) {
         GameObject new_note = (GameObject)Instantiate(maze_note,
@@ -70,7 +68,7 @@ public class MazeMan : MonoBehaviour {
 
     public void remove_target_note_from_field(maze_field_script field_script) {
         GameObject note = field_script.linked_target_note;
-        
+
         if (note != null) {
             Destroy(field_script.linked_target_note);
             field_script.is_target_note = false;
@@ -108,117 +106,154 @@ public class MazeMan : MonoBehaviour {
         }
     }
 
-    public GameObject create_maze_wall (float pos_x, float pos_y, bool stay_visible = false) {
-		
-		string array_index = wall_hash_index(pos_x, pos_y);
-		GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
-		maze_walls_coordinates_hash.Add (array_index, new_maze_wall);
+    public GameObject create_maze_wall(float pos_x, float pos_y, bool stay_visible = false) {
 
-		// check if it's a horizontal wall
-		if (Mathf.Floor(pos_y) != pos_y) {
-			new_maze_wall.transform.localRotation = Quaternion.Euler (0, 0, -90F);
-		}
+        string array_index = wall_hash_index(pos_x, pos_y);
+        GameObject new_maze_wall = (GameObject)Instantiate(maze_wall, new Vector3(pos_x, pos_y, -4F), Quaternion.identity);
+        maze_walls_coordinates_hash.Add(array_index, new_maze_wall);
+
+        // check if it's a horizontal wall
+        if (Mathf.Floor(pos_y) != pos_y) {
+            new_maze_wall.transform.localRotation = Quaternion.Euler(0, 0, -90F);
+        }
 
         if (!stay_visible) {
             maze_wall_script next_maze_wall_script = gameentity.get_maze_wall_script_from_game_object(new_maze_wall);
             next_maze_wall_script.FadeOut(0F);
         }
-		
-		return new_maze_wall;
-	}
-	
-	public GameObject find_or_create_wall_at_coordinates (float x, float y) {
-		
-		if (wall_at_coordinates_exists(x, y)) {
-			
-			return maze_walls_coordinates_hash[wall_hash_index(x, y)];
-		}
-		else {
-			
-			return create_maze_wall(x, y);
-		}
-	}
-	
-	public string wall_hash_index (float x, float y) {
-		string array_index = x.ToString() + '-' + y.ToString();
-		
-		return array_index;
-	}
-	
-	public bool wall_at_coordinates_exists (float x, float y) {
-		if (maze_walls_coordinates_hash.ContainsKey(wall_hash_index(x, y))) {
-			
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public bool field_at_coordinates_exists(int x, int y) {
-		
-		int array_index = coordinates_to_array_index(x, y);
-		
-		return maze_field_coordinates_hash.ContainsKey(array_index);
-	}
 
-	public void quake_from_current_position(float delay) {
+        attach_wall_to_nearest_maze_field(new_maze_wall, pos_x, pos_y);
+
+        if (field_at_coordinates_exists(Mathf.RoundToInt(pos_x), Mathf.RoundToInt(pos_y))) {
+            GameObject maze_field = find_or_create_field_at_coordinates(Mathf.RoundToInt(pos_x), Mathf.RoundToInt(pos_y));
+            new_maze_wall.transform.parent = maze_field.transform;
+        }
+
+        return new_maze_wall;
+    }
+
+    public void attach_wall_to_nearest_maze_field(GameObject wall, float x, float y) {
+
+        int left_x = Mathf.FloorToInt(x);
+        int right_x = Mathf.CeilToInt(x);
+        int bottom_y = Mathf.FloorToInt(y);
+        int top_y = Mathf.CeilToInt(y);
+
+        attach_wall_to_field_at_coords(wall, left_x, bottom_y);
+        attach_wall_to_field_at_coords(wall, left_x, top_y);
+        attach_wall_to_field_at_coords(wall, right_x, bottom_y);
+        attach_wall_to_field_at_coords(wall, right_x, top_y);
+    }
+
+    public void attach_wall_to_field_at_coords(GameObject wall, int x, int y) {
+        if (field_at_coordinates_exists(x, y)) {
+            GameObject maze_field = find_or_create_field_at_coordinates(x, y);
+            wall.transform.parent = maze_field.transform;
+        }
+    }
+
+    public GameObject find_or_create_wall_at_coordinates(float x, float y) {
+
+        if (wall_at_coordinates_exists(x, y)) {
+
+            return maze_walls_coordinates_hash[wall_hash_index(x, y)];
+        }
+        else {
+
+            return create_maze_wall(x, y);
+        }
+    }
+
+    public string wall_hash_index(float x, float y) {
+        string array_index = x.ToString() + '-' + y.ToString();
+
+        return array_index;
+    }
+
+    public bool wall_at_coordinates_exists(float x, float y) {
+        if (maze_walls_coordinates_hash.ContainsKey(wall_hash_index(x, y))) {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool field_at_coordinates_exists(int x, int y) {
+
+        int array_index = coordinates_to_array_index(x, y);
+
+        return maze_field_coordinates_hash.ContainsKey(array_index);
+    }
+
+    public void quake_from_current_position(float delay) {
 
         Vector3 player_coordinates = gameentity.get_current_player_coordinates();
 
-		int radius = 4;
-		int walk_x = (int)player_coordinates.x - radius;
-		int walk_y = (int)player_coordinates.x - radius;
-		int max_x  = (int)player_coordinates.x + radius;
-		int max_y  = (int)player_coordinates.y + radius;
-		
-		while (walk_y < max_y) {
+        int radius = 4;
+        int walk_x = (int)player_coordinates.x - radius;
+        int walk_y = (int)player_coordinates.x - radius;
+        int max_x = (int)player_coordinates.x + radius;
+        int max_y = (int)player_coordinates.y + radius;
+
+        while (walk_y < max_y) {
+
+            if (field_at_coordinates_exists(walk_x, walk_y)) {
+                GameObject maze_field_target = find_or_create_field_at_coordinates(walk_x, walk_y);
+                maze_field_script gotten_maze_script = gameentity.get_maze_field_script_from_game_object(maze_field_target);
+
+                // delay = max difference to player_coord
+                int diff_x = Mathf.Abs(walk_x - (int)player_coordinates.x);
+                int diff_y = Mathf.Abs(walk_y - (int)player_coordinates.y);
+
+                gotten_maze_script.quake(1F, delay + (Mathf.Max(diff_x + diff_y) / 5F));
+            }
+
+            walk_x++;
+
+            if (walk_x > max_x) {
+                walk_x = (int)player_coordinates.x - radius;
+                walk_y++;
+            }
+        }
+    }
+
+    public int coordinates_to_array_index(int coord_x, int coord_y) {
+        return 100 + coord_y * 100 + coord_x;
+    }
+
+    public void animate_maze_destruction() {
+
+        List<GameObject> maze_fields_to_destroy = new List<GameObject>();
+
+        foreach (KeyValuePair<int, GameObject> field in maze_field_coordinates_hash) {
+
+            int field_coord_x = Mathf.RoundToInt(field.Value.transform.position.x);
+            int field_coord_y = Mathf.RoundToInt(field.Value.transform.position.y);
+
+            if (field_at_coordinates_exists(field_coord_x, field_coord_y)) {
+
+                maze_fields_to_destroy.Add(find_or_create_field_at_coordinates(field_coord_x, field_coord_y));
+            }
+        }
+
+        foreach (KeyValuePair<string, GameObject> field in maze_walls_coordinates_hash) {
+            if (wall_at_coordinates_exists(field.Value.transform.position.x, field.Value.transform.position.y)) {
+                GameObject found_wall = find_or_create_wall_at_coordinates(field.Value.transform.position.x, field.Value.transform.position.y);
+                maze_wall_script found_wall_script = gameentity.get_maze_wall_script_from_game_object(found_wall);
+                found_wall_script.FadeOut();
+            }
+        }
+
+        foreach (GameObject maze_field_target in maze_fields_to_destroy) {
+            Vector3 target_position = new Vector3(maze_field_target.transform.position.x, maze_field_target.transform.position.y, 10F);
+            gameentity.smooth_move(
+                maze_field_target.transform.position, target_position, 1F + Random.Range(0, 4F), Random.Range(0, 1F), maze_field_target
+            );
+            maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
+        }
 			
-			if (field_at_coordinates_exists(walk_x, walk_y)) {
-				GameObject maze_field_target = find_or_create_field_at_coordinates(walk_x, walk_y);
-				maze_field_script gotten_maze_script = gameentity.get_maze_field_script_from_game_object(maze_field_target);
-				
-				// delay = max difference to player_coord
-				int diff_x = Mathf.Abs(walk_x - (int)player_coordinates.x);
-				int diff_y = Mathf.Abs(walk_y - (int)player_coordinates.y);
-				
-				gotten_maze_script.quake(1F, delay + (Mathf.Max(diff_x + diff_y) / 5F));
-			}
-			
-			walk_x++;
-			
-			if (walk_x > max_x) {
-				walk_x = (int)player_coordinates.x - radius;
-				walk_y++;
-			}
-		}
-	}
-	
-	public int coordinates_to_array_index(int coord_x, int coord_y) {
-		return 100 + coord_y * 100 + coord_x;
-	}
-	
-	public void animate_maze_destruction() {
-		int finished_destruction = 0;
-		foreach(GameObject maze_field_target in maze_destruction_animator) {
-			Vector3 target_position = new Vector3(maze_field_target.transform.position.x, maze_field_target.transform.position.y, -2F);
-			Vector3 new_position = Vector3.Lerp(maze_field_target.transform.position, target_position, Time.deltaTime * 2);
-			maze_field_target.transform.position = new_position;
-			maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
-			
-			float distance = Vector3.Distance(new_position, target_position);
-			if (distance < 0.2F) {
-				finished_destruction++;
-			}
-		}
-		
-		if (finished_destruction >= maze_destruction_animator.Count && maze_destruction_animator.Count > 100) {
-			foreach(GameObject maze_field_target in maze_destruction_animator) {
-				Vector3 target_position = gameentity.get_random_offscreen_position(maze_field_target.transform.position.z);
-				gameentity.smooth_move(maze_field_target.transform.position, target_position, Random.Range (0, 1F), Random.Range (0, 1F), maze_field_target);
-			}
-			
-			maze_deconstruction = false;
-		}
+		maze_deconstruction = false;
 	}
 	
 	public void build_maze() {
