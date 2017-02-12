@@ -17,6 +17,7 @@ public class MazeMan : MonoBehaviour {
     public GameObject base_note;
 
     public bool maze_deconstruction = false;
+    bool maze_deconstruction_initialized = false;
 
     public GameObject create_maze_field(int col_count, int row_count) {
 
@@ -224,37 +225,41 @@ public class MazeMan : MonoBehaviour {
 
     public void animate_maze_destruction() {
 
-        List<GameObject> maze_fields_to_destroy = new List<GameObject>();
+        if (maze_deconstruction_initialized == false) {
+            List<GameObject> maze_fields_to_destroy = new List<GameObject>();
 
-        foreach (KeyValuePair<int, GameObject> field in maze_field_coordinates_hash) {
+            foreach (KeyValuePair<int, GameObject> field in maze_field_coordinates_hash) {
 
-            int field_coord_x = Mathf.RoundToInt(field.Value.transform.position.x);
-            int field_coord_y = Mathf.RoundToInt(field.Value.transform.position.y);
+                int field_coord_x = Mathf.RoundToInt(field.Value.transform.position.x);
+                int field_coord_y = Mathf.RoundToInt(field.Value.transform.position.y);
 
-            if (field_at_coordinates_exists(field_coord_x, field_coord_y)) {
+                if (field_at_coordinates_exists(field_coord_x, field_coord_y)) {
 
-                maze_fields_to_destroy.Add(find_or_create_field_at_coordinates(field_coord_x, field_coord_y));
+                    maze_fields_to_destroy.Add(find_or_create_field_at_coordinates(field_coord_x, field_coord_y));
+                }
             }
-        }
 
-        foreach (KeyValuePair<string, GameObject> field in maze_walls_coordinates_hash) {
-            if (wall_at_coordinates_exists(field.Value.transform.position.x, field.Value.transform.position.y)) {
-                GameObject found_wall = find_or_create_wall_at_coordinates(field.Value.transform.position.x, field.Value.transform.position.y);
-                maze_wall_script found_wall_script = gameentity.get_maze_wall_script_from_game_object(found_wall);
-                found_wall_script.FadeOut();
+            foreach (KeyValuePair<string, GameObject> field in maze_walls_coordinates_hash) {
+                if (wall_at_coordinates_exists(field.Value.transform.position.x, field.Value.transform.position.y)) {
+                    GameObject found_wall = find_or_create_wall_at_coordinates(field.Value.transform.position.x, field.Value.transform.position.y);
+                    maze_wall_script found_wall_script = gameentity.get_maze_wall_script_from_game_object(found_wall);
+                    found_wall_script.FadeOut();
+                }
             }
-        }
 
-        foreach (GameObject maze_field_target in maze_fields_to_destroy) {
-            Vector3 target_position = new Vector3(maze_field_target.transform.position.x, maze_field_target.transform.position.y, 10F);
-            gameentity.smooth_move(
-                maze_field_target.transform.position, target_position, 1F + Random.Range(0, 4F), Random.Range(0, 1F), maze_field_target
-            );
-            maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
+            foreach (GameObject maze_field_target in maze_fields_to_destroy) {
+                Vector3 target_position = new Vector3(maze_field_target.transform.position.x, maze_field_target.transform.position.y, 10F);
+                gameentity.smooth_move(
+                    maze_field_target.transform.position, target_position, 1F + Random.Range(0, 4F), Random.Range(0, 1F), maze_field_target
+                );
+                maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
+            }
+
+            finish_maze_destruction(5F);
+
+            maze_deconstruction_initialized = true;
         }
-			
-		maze_deconstruction = false;
-	}
+    }
 	
 	public void build_maze() {
 		while (maze_initialized < 4) {
@@ -310,6 +315,28 @@ public class MazeMan : MonoBehaviour {
         foreach (EditorMan.Coords coords in to_delete) {
             destroy_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
         }
+
+        maze_field_coordinates_hash = new Dictionary<int, GameObject>();
+        maze_walls_coordinates_hash = new Dictionary<string, GameObject>();
+
+        maze_deconstruction = false;
+        maze_deconstruction_initialized = false;
+    }
+
+    IEnumerator finish_maze_destruction_numerator(float delay_seconds) {
+        float t = 0.0F;
+        while (t <= 1.0F) {
+            t += Time.deltaTime / delay_seconds;
+            yield return null;
+        }
+
+        StopAllCoroutines();
+        clean_maze();
+        gameentity.return_to_title();
+    }
+
+    public void finish_maze_destruction(float delay_seconds) {
+        gameentity.start_coroutine(finish_maze_destruction_numerator(delay_seconds));
     }
 
     public void highlight_walls_around_maze_field(maze_field_script given_maze_field, bool fadeout) {

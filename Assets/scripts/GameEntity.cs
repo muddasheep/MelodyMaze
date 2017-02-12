@@ -15,6 +15,7 @@ public class GameEntity : MonoBehaviour {
 
 	public bool game_running = false;
     public bool editor_running = false;
+    public int current_level = 0; // -1 = random
 
     public class GameMaster {
         public GameObject base_note_ingame;
@@ -455,7 +456,6 @@ public class GameEntity : MonoBehaviour {
                 mazeman.animate_maze_destruction();
             }
         }
-
     }
 
     InputMan inputman;
@@ -562,7 +562,8 @@ public class GameEntity : MonoBehaviour {
         gamemaster = new GameMaster { inputman = inputman, mazeman = mazeman, gameentity = this };
         mazeman.build_maze();
 		game_running = true;
-	}
+        current_level = -1;
+    }
 	
 	public void start_editor() {
         destroy_title_screen();
@@ -575,6 +576,11 @@ public class GameEntity : MonoBehaviour {
         editor_running = false;
         menuman.displaying_menu = false;
         mazeman.maze_initialized = 0;
+
+        if (gamemaster != null && gamemaster.base_note_ingame != null) {
+            Destroy(gamemaster.base_note_ingame);
+            gamemaster.base_note_ingame = null;
+        }
 
         if (camera_target) {
             Destroy(camera_target);
