@@ -23,16 +23,6 @@ public class maze_field_script : MonoBehaviour {
 
 	int removed_sides = 0;
 
-	// Use this for initialization
-	void Awake () {
-
-	}
-	
-	// Update is called once per frame
-	void Update () {
-
-	}
-
 	public bool can_remove_sides() {
 		if (removed_sides < 2) {
 			return true;

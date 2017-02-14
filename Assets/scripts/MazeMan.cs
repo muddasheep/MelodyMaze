@@ -226,6 +226,7 @@ public class MazeMan : MonoBehaviour {
     public void animate_maze_destruction() {
 
         if (maze_deconstruction_initialized == false) {
+
             List<GameObject> maze_fields_to_destroy = new List<GameObject>();
 
             foreach (KeyValuePair<int, GameObject> field in maze_field_coordinates_hash) {
@@ -252,7 +253,15 @@ public class MazeMan : MonoBehaviour {
                 gameentity.smooth_move(
                     maze_field_target.transform.position, target_position, 1F + Random.Range(0, 4F), Random.Range(0, 1F), maze_field_target
                 );
-                maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
+
+                Vector3 angles =
+                    Vector3.up * (20 + Random.Range(0.0f, 70.0f)) +
+                    Vector3.down * (20 + Random.Range(0.0f, 70.0f)) +
+                    Vector3.left * (20 + Random.Range(0.0f, 70.0f)) +
+                    Vector3.right * (20 + Random.Range(0.0f, 70.0f));
+
+                gameentity.start_coroutine(gameentity.rotate_object(maze_field_target, angles, 5F));
+                //maze_field_target.transform.Rotate(-1F, 1F, 3F, Space.World);
             }
 
             finish_maze_destruction(5F);
@@ -684,10 +693,5 @@ public class MazeMan : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		gameentity = GetComponent<GameEntity>();
-	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
-	
 	}
 }

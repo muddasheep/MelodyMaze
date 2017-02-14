@@ -17,11 +17,6 @@ public class keyboard_button_script : MonoBehaviour {
         sprite_renderer = button.GetComponent<SpriteRenderer>();
     }
 	
-	// Update is called once per frame
-	void FixedUpdate () {
-	    
-	}
-
     public void turn_on() {
         sprite_renderer.sprite = button_on;
         active = true;

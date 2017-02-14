@@ -18,11 +18,6 @@ public class base_note_script : MonoBehaviour {
 
 	bool set_up_camp = false;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-
 	IEnumerator RotateObj(GameObject target_object, Vector3 byAngles, float inTime) {
 		var fromAngle = target_object.transform.rotation;
 		var toAngle = Quaternion.Euler(target_object.transform.eulerAngles + byAngles);

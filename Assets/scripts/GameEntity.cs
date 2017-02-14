@@ -205,6 +205,7 @@ public class GameEntity : MonoBehaviour {
                 next_base_note_script.set_up_base_camp();
 
                 gameentity.smooth_move(player_sphere.transform.position, new Vector3(0F, 0F, -4.7F), 0.5F, 0F, player_sphere);
+                gameentity.smooth_adjust_camera(hover_field.transform.position.x, hover_field.transform.position.y);
             }
         }
 
@@ -378,6 +379,7 @@ public class GameEntity : MonoBehaviour {
         }
 
         void finish_note_collection() {
+            gameentity.smooth_adjust_camera(base_note_ingame.transform.position.x, base_note_ingame.transform.position.y);
             gameentity.start_coroutine(finish_note_collection_delay(1F));
         }
 
@@ -408,8 +410,26 @@ public class GameEntity : MonoBehaviour {
         }
 
         int maze_path_redraw_rate_counter = 0;
+        bool maze_deconstruction_initialized = false;
         public void deconstruct_maze() {
-            if (player_saved_paths.Count > 0) {
+            if (maze_deconstruction_initialized == false) {
+
+                gameentity.smooth_adjust_camera(base_note_ingame.transform.position.x, base_note_ingame.transform.position.y, -25F);
+                gameentity.start_coroutine(redraw_found_melody_iterator(1.5F));
+
+                maze_deconstruction_initialized = true;
+            }
+        }
+
+        IEnumerator redraw_found_melody_iterator(float delay_seconds) {
+            float t = 0.0F;
+            while (t <= 1.0F) {
+                t += Time.deltaTime / delay_seconds;
+                yield return null;
+            }
+
+            while (player_saved_paths.Count > 0) {
+
                 if (maze_path_redraw_rate_counter < 2) {
                     maze_path_redraw_rate_counter++;
                 }
@@ -443,8 +463,11 @@ public class GameEntity : MonoBehaviour {
                     player_saved_paths = player_saved_paths_altered;
                     maze_path_redraw_rate_counter = 0;
                 }
+
+                yield return null;
             }
-            else {
+
+            if (player_saved_paths.Count == 0) {
                 if (maze_path_redraw_rate_counter < 4) {
                     maze_path_redraw_rate_counter++;
                 }
@@ -472,7 +495,7 @@ public class GameEntity : MonoBehaviour {
 		menuman   = GetComponent<MenuMan>();
 		editorman = GetComponent<EditorMan>();
 
-        initial_cam_position = maze_cam.transform.position;
+        initial_cam_position = gameObject.transform.position;
 
         start_time = Time.time;
 	}
@@ -636,7 +659,16 @@ public class GameEntity : MonoBehaviour {
 		return new Vector3(target_x, target_y, target_z);
 	}
 
-	public void smooth_move (Vector3 startpos, Vector3 endpos, float seconds, float delay_seconds, GameObject moving_object) {
+    public IEnumerator rotate_object(GameObject target_object, Vector3 byAngles, float inTime) {
+        var fromAngle = target_object.transform.rotation;
+        var toAngle = Quaternion.Euler(target_object.transform.eulerAngles + byAngles);
+        for (var t = 0f; t < 1; t += Time.deltaTime / inTime) {
+            target_object.transform.rotation = Quaternion.Lerp(fromAngle, toAngle, t);
+            yield return null;
+        }
+    }
+
+    public void smooth_move (Vector3 startpos, Vector3 endpos, float seconds, float delay_seconds, GameObject moving_object) {
 		StartCoroutine(smooth_move_iterator(startpos, endpos, seconds, delay_seconds, moving_object));
 	}
 
@@ -685,16 +717,23 @@ public class GameEntity : MonoBehaviour {
 		return next_maze_script;
 	}
 
+    public void smooth_adjust_camera(float x, float y, float z = -20.8F, float seconds = 1F, float delay_seconds = 0F) {
+        smooth_move(
+            gameObject.transform.position,
+            new Vector3(x, y, z), seconds, delay_seconds, gameObject
+        );
+    }
+
     public void reset_camera() {
 
-        maze_cam.transform.position = initial_cam_position;
+        gameObject.transform.position = initial_cam_position;
     }
 
     public void adjust_camera() {
         if (!camera_target) {
             return;
         }
-        maze_cam.transform.position = new Vector3(camera_target.transform.position.x, camera_target.transform.position.y, -20.8F);
+        gameObject.transform.position = new Vector3(camera_target.transform.position.x, camera_target.transform.position.y, -20.8F);
     }
 
     public void center_camera_within_maze_bounds() {
@@ -724,9 +763,9 @@ public class GameEntity : MonoBehaviour {
             cam_y = highest_y - 4;
         }
 
-        Vector3 new_cam_pos = new Vector3(cam_x, cam_y, maze_cam.transform.position.z);
+        Vector3 new_cam_pos = new Vector3(cam_x, cam_y, gameObject.transform.position.z);
 
-        maze_cam.transform.position = new_cam_pos;
+        gameObject.transform.position = new_cam_pos;
     }
 
     public void start_coroutine(IEnumerator numerator) {

@@ -154,12 +154,12 @@ public class MenuMan : MonoBehaviour {
 
         int index = 0;
 
-		float count_y = gameentity.maze_cam.transform.position.y;
+		float count_y = gameentity.transform.position.y;
 
 		foreach (MenuItem item in current_menu) {
 
 			item.my_object = (GameObject)Instantiate(
-				menu_item, new Vector3(gameentity.maze_cam.transform.position.x, count_y, -6F), Quaternion.identity
+				menu_item, new Vector3(gameentity.transform.position.x, count_y, -6F), Quaternion.identity
 			);
 
             item.highlighted = false;

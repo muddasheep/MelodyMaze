@@ -4,17 +4,6 @@ using System.Collections;
 public class maze_wall_script : MonoBehaviour {
 	public GameObject wall_top;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-
 	/****** DARTH FADER ******/
 
 	// publically editable speed
