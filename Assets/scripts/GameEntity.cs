@@ -477,6 +477,14 @@ public class GameEntity : MonoBehaviour {
                 }
 
                 mazeman.animate_maze_destruction();
+                gameentity.turn_on_the_fog_machine();
+                base_note_script next_base_note_script = gameentity.get_base_note_script_from_game_object(base_note_ingame);
+                next_base_note_script.unset_base_camp();
+                gameentity.smooth_move(
+                    base_note_ingame.transform.position,
+                    new Vector3(base_note_ingame.transform.position.x, base_note_ingame.transform.position.y, 30F),
+                    3F, 2F, base_note_ingame
+                );
             }
         }
     }
@@ -612,6 +620,7 @@ public class GameEntity : MonoBehaviour {
         gamemaster = null;
         mazeman.clean_maze();
         reset_camera();
+        turn_off_the_fog_machine();
 
         StopAllCoroutines();
     }
@@ -770,5 +779,23 @@ public class GameEntity : MonoBehaviour {
 
     public void start_coroutine(IEnumerator numerator) {
         StartCoroutine(numerator);
+    }
+
+    public void turn_on_the_fog_machine() {
+        RenderSettings.fog = true;
+        start_coroutine(fog_machine_intensifies(8F));
+    }
+
+    IEnumerator fog_machine_intensifies(float seconds) {
+        float t = 0.0F;
+        while (t <= 1.0F) {
+            t += Time.deltaTime / seconds;
+            RenderSettings.fogDensity = 0.12F * t;
+            yield return null;
+        }
+    }
+
+    public void turn_off_the_fog_machine() {
+        RenderSettings.fog = false;
     }
 }

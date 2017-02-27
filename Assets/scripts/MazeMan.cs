@@ -248,10 +248,28 @@ public class MazeMan : MonoBehaviour {
                 }
             }
 
+            int center_x = (int)gameentity.transform.position.x;
+            int center_y = (int)gameentity.transform.position.y;
+
             foreach (GameObject maze_field_target in maze_fields_to_destroy) {
-                Vector3 target_position = new Vector3(maze_field_target.transform.position.x, maze_field_target.transform.position.y, 10F);
+
+                // center +30F, the farther away, the closer to -100F
+                int diff_x = Mathf.Abs(center_x - (int)maze_field_target.transform.position.x);
+                int diff_y = Mathf.Abs(center_y - (int)maze_field_target.transform.position.y);
+                int total_distance = diff_x + diff_y;
+                float new_z = 30F - (total_distance * 10F);
+
+                Vector3 target_position = new Vector3(
+                    maze_field_target.transform.position.x,
+                    maze_field_target.transform.position.y,
+                    new_z
+                );
                 gameentity.smooth_move(
-                    maze_field_target.transform.position, target_position, 1F + Random.Range(0, 4F), Random.Range(0, 1F), maze_field_target
+                    maze_field_target.transform.position,
+                    target_position,
+                    1F + Random.Range(0, 4F),
+                    Random.Range(0, 1F),
+                    maze_field_target
                 );
 
                 Vector3 angles =

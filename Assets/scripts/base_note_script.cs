@@ -28,7 +28,7 @@ public class base_note_script : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		if (current_base_note) {
 			if(current_base_note.transform.position.z > -25F) {
 				Vector3 target_position = new Vector3(current_base_note.transform.position.x, current_base_note.transform.position.y, -25F);
@@ -59,14 +59,21 @@ public class base_note_script : MonoBehaviour {
 		}
 	}
 
-	public void set_up_base_camp() {
-		if (set_up_camp == false) {
-			StartCoroutine(RotateObj(note_wing_top, Vector3.left * 90, 1));
-			StartCoroutine(RotateObj(note_wing_left, Vector3.up * 90, 1));
-			StartCoroutine(RotateObj(note_wing_right, Vector3.down * 90, 1));
-			StartCoroutine(RotateObj(note_wing_bottom, Vector3.right * 90, 1));
-			
-			set_up_camp = true;
-		}
-	}
+    public void set_up_base_camp() {
+        if (set_up_camp == false) {
+            StartCoroutine(RotateObj(note_wing_top, Vector3.left * 90, 1));
+            StartCoroutine(RotateObj(note_wing_left, Vector3.up * 90, 1));
+            StartCoroutine(RotateObj(note_wing_right, Vector3.down * 90, 1));
+            StartCoroutine(RotateObj(note_wing_bottom, Vector3.right * 90, 1));
+
+            set_up_camp = true;
+        }
+    }
+
+    public void unset_base_camp() {
+        StartCoroutine(RotateObj(note_wing_top, Vector3.right * 90, 1));
+        StartCoroutine(RotateObj(note_wing_left, Vector3.down * 90, 1));
+        StartCoroutine(RotateObj(note_wing_right, Vector3.up * 90, 1));
+        StartCoroutine(RotateObj(note_wing_bottom, Vector3.left * 90, 1));
+    }
 }
