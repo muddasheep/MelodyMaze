@@ -36,6 +36,7 @@ public class StorageMan : MonoBehaviour {
         public string note;
         public bool base_note;
         public bool target_note;
+        public int instrument;
     }
 
     [Serializable]
@@ -76,6 +77,7 @@ public class StorageMan : MonoBehaviour {
                 note = maze_script.note,
                 base_note = maze_script.is_base_note,
                 target_note = maze_script.is_target_note,
+                instrument = maze_script.instrument,
             });
         }
 

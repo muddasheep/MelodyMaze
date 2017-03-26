@@ -22,6 +22,7 @@ public class EditorMan : MonoBehaviour {
     public GameObject piano_key_white_prototype;
     public GameObject piano_key_black_prototype;
     public GameObject keyboard_button;
+    public GameObject instrument_display;
     public GameObject piano_key_highlighter_prototype;
     GameObject piano_key_highlighter;
     public int init_settings_x_counter;
@@ -47,10 +48,15 @@ public class EditorMan : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (gameentity.editor_running && !menuman.displaying_menu) {
-            inputman.detectPressedKeyOrButton();
+        if (gameentity.editor_running) {
+            if (!menuman.displaying_menu) {
+                inputman.detectPressedKeyOrButton();
 
-            gameentity.center_camera_within_maze_bounds();
+                gameentity.center_camera_within_maze_bounds();
+            }
+            else {
+                hide_field_settings();
+            }
         }
     }
 
@@ -119,7 +125,11 @@ public class EditorMan : MonoBehaviour {
 
         if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
             maze_field_script hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
-            soundman.play_sound("instruments/piano/piano_" + hover_maze_field_script.note);
+
+            soundman.play_instrument_sound(
+                instruments[hover_maze_field_script.instrument],
+                hover_maze_field_script.note
+            );
         }
     }
 
@@ -243,7 +253,10 @@ public class EditorMan : MonoBehaviour {
         if (mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
 
             show_field_settings(pos_x, pos_y);
-            soundman.play_sound("instruments/piano/piano_" + editing_maze_field_script.note);
+            soundman.play_instrument_sound(
+                instruments[editing_maze_field_script.instrument],
+                editing_maze_field_script.note
+            );
         }
     }
 
@@ -273,11 +286,13 @@ public class EditorMan : MonoBehaviour {
     };
 
     public List<string> instruments = new List<string> {
-        "piano"
+        "piano", "guitar"
     };
 
     Piano current_piano;
     KeyboardButtons current_keyboard_buttons;
+    GameObject current_instrument_display;
+    instrument_display_script current_instrument_display_script;
 
     void show_field_settings(float x, float y) {
         hide_field_settings();
@@ -288,6 +303,8 @@ public class EditorMan : MonoBehaviour {
         build_piano(x, y);
 
         show_buttons(x, y);
+
+        show_instrument_display(x, y);
     }
 
     void show_buttons(float x, float y) {
@@ -322,10 +339,41 @@ public class EditorMan : MonoBehaviour {
             current_keyboard_buttons.buttons[1].button_script.turn_on();
         }
 
+        button_x += 5.4F;
+
+        // button for instrument
+        new_button = (GameObject)Instantiate(keyboard_button,
+            new Vector3(button_x, y + 2.5F, -5F), Quaternion.identity
+        );
+        current_keyboard_buttons.buttons.Add(new KeyboardButton {
+            button_script = new_button.GetComponent<keyboard_button_script>(),
+            text = "Instrument"
+        });
+
+        button_x += 1.2F;
+
+        // placeholder
+        new_button = (GameObject)Instantiate(keyboard_button,
+            new Vector3(button_x, y + 2.5F, -5F), Quaternion.identity
+        );
+        current_keyboard_buttons.buttons.Add(new KeyboardButton {
+            button_script = new_button.GetComponent<keyboard_button_script>(),
+            text = "Hog"
+        });
+
         // set text
         foreach (KeyboardButton button in current_keyboard_buttons.buttons) {
             button.button_script.button_text.text = button.text;
         }
+    }
+
+    void show_instrument_display(float x, float y) {
+
+        current_instrument_display = (GameObject)Instantiate(instrument_display,
+            new Vector3(x - 0.2F, y + 2.65F, -5F), Quaternion.identity
+        );
+        current_instrument_display_script = (instrument_display_script)current_instrument_display.GetComponent(typeof(instrument_display_script));
+        current_instrument_display_script.display_text.text = instruments[editing_maze_field_script.instrument];
     }
 
     void build_piano(float x, float y) {
@@ -341,6 +389,7 @@ public class EditorMan : MonoBehaviour {
         init_settings_x_counter = 0;
 
         foreach (string note in notes) {
+
             GameObject key_prototype = piano_key_white_prototype;
 
             bool white = true;
@@ -452,6 +501,14 @@ public class EditorMan : MonoBehaviour {
                     mazeman.remove_target_note_from_field(editing_maze_field_script);
                 }
             }
+
+            if (settings_pos_x == 2) { // instrument
+                editing_maze_field_script.toggle_instrument();
+
+                current_keyboard_buttons.buttons[settings_pos_x].button_script.turn_off();
+
+                current_instrument_display_script.display_text.text = instruments[editing_maze_field_script.instrument];
+            }
         }
 
         if (settings_pos_y == 1) { // piano keys
@@ -461,7 +518,12 @@ public class EditorMan : MonoBehaviour {
             }
             else {
                 editing_maze_field_script.save_note(current_piano.notes[settings_pos_x].note);
-                soundman.play_sound("instruments/piano/piano_" + current_piano.notes[settings_pos_x].note);
+
+                soundman.play_instrument_sound(
+                    instruments[editing_maze_field_script.instrument],
+                    current_piano.notes[settings_pos_x].note
+                );
+
                 highlight_piano_key(settings_pos_x);
             }
         }
@@ -482,8 +544,11 @@ public class EditorMan : MonoBehaviour {
             Destroy(button.button_script.gameObject);
         }
 
+        Destroy(current_instrument_display);
+
         current_piano = null;
         current_keyboard_buttons = null;
+        current_instrument_display = null;
         editing_maze_field = null;
         editing_maze_field_script = null;
 
@@ -547,7 +612,7 @@ public class EditorMan : MonoBehaviour {
 
     public void load_level(int level_number) {
         if (level_file_exists(level_number)) {
-            current_level = level_number;
+           current_level = level_number;
            StorageMan.Maze maze = storageman.load_from_json(level_number);
            build_maze_from_maze_class(maze);
         }
@@ -573,6 +638,8 @@ public class EditorMan : MonoBehaviour {
             }
 
             field_script.save_note(maze_field.note);
+
+            field_script.instrument = maze_field.instrument;
         }
     }
 

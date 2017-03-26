@@ -7,6 +7,7 @@ public class maze_field_script : MonoBehaviour {
     public string note { get; set; }
     public bool is_base_note { get; set; }
     public bool is_target_note { get; set; }
+    public int instrument = 0;
     public GameObject linked_target_note { get; set; }
 
     public GameObject note_sprite;
@@ -125,5 +126,13 @@ public class maze_field_script : MonoBehaviour {
         Destroy(note_indicator);
 
         note_indicator = null;
+    }
+
+    public void toggle_instrument() {
+        instrument++;
+
+        if (instrument > 1) {
+            instrument = 0;
+        }
     }
 }

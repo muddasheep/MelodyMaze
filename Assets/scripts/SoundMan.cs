@@ -19,4 +19,8 @@ public class SoundMan : MonoBehaviour {
 
 		sound_player.PlayOneShot(clip);
 	}
+
+    public void play_instrument_sound(string instrument_type, string note) {
+        play_sound("instruments/" + instrument_type + "/" + instrument_type + "_" + note);
+    }
 }
