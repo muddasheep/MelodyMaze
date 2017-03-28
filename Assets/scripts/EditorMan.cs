@@ -126,9 +126,14 @@ public class EditorMan : MonoBehaviour {
         if (moved && mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
             maze_field_script hover_maze_field_script = gameentity.get_maze_field_script(pos_x, pos_y);
 
+            int pitch_amount = 0;
+            if (hover_maze_field_script.is_base_note) {
+                pitch_amount = -12;
+            }
             soundman.play_instrument_sound(
-                instruments[hover_maze_field_script.instrument],
-                hover_maze_field_script.note
+                instrument_names[hover_maze_field_script.instrument],
+                hover_maze_field_script.note,
+                pitch_amount
             );
         }
     }
@@ -254,7 +259,7 @@ public class EditorMan : MonoBehaviour {
 
             show_field_settings(pos_x, pos_y);
             soundman.play_instrument_sound(
-                instruments[editing_maze_field_script.instrument],
+                instrument_names[editing_maze_field_script.instrument],
                 editing_maze_field_script.note
             );
         }
@@ -285,7 +290,7 @@ public class EditorMan : MonoBehaviour {
         "c3"
     };
 
-    public List<string> instruments = new List<string> {
+    public List<string> instrument_names = new List<string> {
         "piano", "guitar"
     };
 
@@ -373,7 +378,7 @@ public class EditorMan : MonoBehaviour {
             new Vector3(x - 0.2F, y + 2.65F, -5F), Quaternion.identity
         );
         current_instrument_display_script = (instrument_display_script)current_instrument_display.GetComponent(typeof(instrument_display_script));
-        current_instrument_display_script.display_text.text = instruments[editing_maze_field_script.instrument];
+        current_instrument_display_script.display_text.text = instrument_names[editing_maze_field_script.instrument];
     }
 
     void build_piano(float x, float y) {
@@ -506,8 +511,8 @@ public class EditorMan : MonoBehaviour {
                 editing_maze_field_script.toggle_instrument();
 
                 current_keyboard_buttons.buttons[settings_pos_x].button_script.turn_off();
-
-                current_instrument_display_script.display_text.text = instruments[editing_maze_field_script.instrument];
+                Debug.Log(instrument_names.ToString());
+                current_instrument_display_script.display_text.text = instrument_names[editing_maze_field_script.instrument];
             }
         }
 
@@ -520,7 +525,7 @@ public class EditorMan : MonoBehaviour {
                 editing_maze_field_script.save_note(current_piano.notes[settings_pos_x].note);
 
                 soundman.play_instrument_sound(
-                    instruments[editing_maze_field_script.instrument],
+                    instrument_names[editing_maze_field_script.instrument],
                     current_piano.notes[settings_pos_x].note
                 );
 
