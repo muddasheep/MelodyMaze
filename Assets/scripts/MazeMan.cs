@@ -579,10 +579,14 @@ public class MazeMan : MonoBehaviour {
 		
 		// create fields from coordinates
 		previous_field = current_field;
-		foreach (TakenPath path in tunnel_saved_path_coordinates) {
+        int selected_instrument = Random.Range(0, gameentity.instrument_names.Count);
+        foreach (TakenPath path in tunnel_saved_path_coordinates) {
 			current_field = find_or_create_field_at_coordinates(path.coord_x, path.coord_y);
 			maze_field_script current_script = (maze_field_script)current_field.GetComponent(typeof(maze_field_script));
-			
+
+            current_script.instrument = selected_instrument;
+            current_script.note = gameentity.notes[Random.Range(0, gameentity.notes.Count)];
+
 			if(previous_field) {
 				maze_field_script previous_script = (maze_field_script)previous_field.GetComponent(typeof(maze_field_script));
 				

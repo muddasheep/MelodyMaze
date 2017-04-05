@@ -131,7 +131,7 @@ public class EditorMan : MonoBehaviour {
                 pitch_amount = -12;
             }
             soundman.play_instrument_sound(
-                instrument_names[hover_maze_field_script.instrument],
+                gameentity.instrument_names[hover_maze_field_script.instrument],
                 hover_maze_field_script.note,
                 pitch_amount
             );
@@ -259,7 +259,7 @@ public class EditorMan : MonoBehaviour {
 
             show_field_settings(pos_x, pos_y);
             soundman.play_instrument_sound(
-                instrument_names[editing_maze_field_script.instrument],
+                gameentity.instrument_names[editing_maze_field_script.instrument],
                 editing_maze_field_script.note
             );
         }
@@ -283,16 +283,6 @@ public class EditorMan : MonoBehaviour {
         public keyboard_button_script button_script { get; set; }
         public string text { get; set; }
     }
-
-    public List<string> notes = new List<string> {
-        "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h",
-        "c2", "cis2", "d2", "dis2", "e2", "f2", "fis2", "g2", "gis2", "a2", "b2", "h2",
-        "c3"
-    };
-
-    public List<string> instrument_names = new List<string> {
-        "piano", "guitar"
-    };
 
     Piano current_piano;
     KeyboardButtons current_keyboard_buttons;
@@ -378,7 +368,7 @@ public class EditorMan : MonoBehaviour {
             new Vector3(x - 0.2F, y + 2.65F, -5F), Quaternion.identity
         );
         current_instrument_display_script = (instrument_display_script)current_instrument_display.GetComponent(typeof(instrument_display_script));
-        current_instrument_display_script.display_text.text = instrument_names[editing_maze_field_script.instrument];
+        current_instrument_display_script.display_text.text = gameentity.instrument_names[editing_maze_field_script.instrument];
     }
 
     void build_piano(float x, float y) {
@@ -393,7 +383,7 @@ public class EditorMan : MonoBehaviour {
         float piano_pos_z = piano_white_z;
         init_settings_x_counter = 0;
 
-        foreach (string note in notes) {
+        foreach (string note in gameentity.notes) {
 
             GameObject key_prototype = piano_key_white_prototype;
 
@@ -511,8 +501,7 @@ public class EditorMan : MonoBehaviour {
                 editing_maze_field_script.toggle_instrument();
 
                 current_keyboard_buttons.buttons[settings_pos_x].button_script.turn_off();
-                Debug.Log(instrument_names.ToString());
-                current_instrument_display_script.display_text.text = instrument_names[editing_maze_field_script.instrument];
+                current_instrument_display_script.display_text.text = gameentity.instrument_names[editing_maze_field_script.instrument];
             }
         }
 
@@ -525,7 +514,7 @@ public class EditorMan : MonoBehaviour {
                 editing_maze_field_script.save_note(current_piano.notes[settings_pos_x].note);
 
                 soundman.play_instrument_sound(
-                    instrument_names[editing_maze_field_script.instrument],
+                    gameentity.instrument_names[editing_maze_field_script.instrument],
                     current_piano.notes[settings_pos_x].note
                 );
 

@@ -17,6 +17,16 @@ public class GameEntity : MonoBehaviour {
     public bool editor_running = false;
     public int current_level = 0; // -1 = random
 
+    public List<string> instrument_names = new List<string> {
+        "piano", "guitar"
+    };
+
+    public List<string> notes = new List<string> {
+        "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h",
+        "c2", "cis2", "d2", "dis2", "e2", "f2", "fis2", "g2", "gis2", "a2", "b2", "h2",
+        "c3"
+    };
+
     public class GameMaster {
         public GameObject base_note_ingame;
         public GameObject player_sphere;
@@ -153,6 +163,8 @@ public class GameEntity : MonoBehaviour {
                         player_saved_path_coordinates.Add(new TakenPath { coord_x = player_coord_x, coord_y = player_coord_y });
                     }
                     player_target_position = new Vector3(player_coord_x, player_coord_y, -4.3F);
+
+                    gameentity.play_maze_field_note(current_maze_field);
 
                     mazeman.highlight_walls_around_maze_field(current_maze_field, true);
 
@@ -494,6 +506,7 @@ public class GameEntity : MonoBehaviour {
 	MenuMan menuman;
 	EditorMan editorman;
     GameMaster gamemaster;
+    SoundMan soundman;
 
 	// Use this for initialization
 	void Start () {
@@ -501,7 +514,8 @@ public class GameEntity : MonoBehaviour {
         inputman  = GetComponent<InputMan>();
         mazeman   = GetComponent<MazeMan>();
 		menuman   = GetComponent<MenuMan>();
-		editorman = GetComponent<EditorMan>();
+        editorman = GetComponent<EditorMan>();
+        soundman  = GetComponent<SoundMan>();
 
         initial_cam_position = gameObject.transform.position;
 
@@ -725,6 +739,11 @@ public class GameEntity : MonoBehaviour {
 
 		return next_maze_script;
 	}
+
+    public void play_maze_field_note(maze_field_script given_maze_field) {
+
+        soundman.play_instrument_sound(instrument_names[given_maze_field.instrument], given_maze_field.note);
+    }
 
     public void smooth_adjust_camera(float x, float y, float z = -20.8F, float seconds = 1F, float delay_seconds = 0F) {
         smooth_move(
