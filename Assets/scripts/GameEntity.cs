@@ -164,12 +164,12 @@ public class GameEntity : MonoBehaviour {
                     }
                     player_target_position = new Vector3(player_coord_x, player_coord_y, -4.3F);
 
-                    gameentity.play_maze_field_note(current_maze_field);
-
                     mazeman.highlight_walls_around_maze_field(current_maze_field, true);
 
                     maze_field_script next_maze_field = gameentity.get_maze_field_script(player_coord_x, player_coord_y);
                     mazeman.highlight_walls_around_maze_field(next_maze_field, false);
+
+                    gameentity.play_maze_field_note(next_maze_field);
                 }
             }
         }
@@ -348,6 +348,8 @@ public class GameEntity : MonoBehaviour {
                 if (note_script.coord_x == check_coord_x && note_script.coord_y == check_coord_y && note_script.collected == false) {
                     note_script.collected = true;
                     collected_notes++;
+
+                    mazeman.highlight_walls_around_maze_field(current_maze_field, true);
 
                     player_sphere.transform.parent = current_maze_field.gameObject.transform;
 

@@ -57,6 +57,15 @@ public class EditorMan : MonoBehaviour {
             else {
                 hide_field_settings();
             }
+
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 100)) {
+                Debug.Log(hit.collider.gameObject);
+                Debug.DrawLine(ray.origin, hit.point);
+            }
         }
     }
 
