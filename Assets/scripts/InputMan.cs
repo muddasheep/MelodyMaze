@@ -41,7 +41,7 @@ public class InputMan : MonoBehaviour {
     public bool player_action_button_down = false;
 
     public bool player_pressed_action_once() {
-        if (Input.GetKey(KeyCode.Space) || Input.GetButton("Fire1")) {
+        if (Input.GetButton("Fire1")) {
             if (player_action_button_down == false) {
                 player_action_button_down = true;
                 return true;
@@ -55,7 +55,7 @@ public class InputMan : MonoBehaviour {
     }
 
     public bool player_pressed_escape() {
-        if (Input.GetKey(KeyCode.Escape) || Input.GetButton("Cancel")) {
+        if (Input.GetButton("Cancel")) {
             return true;
         }
 
@@ -64,7 +64,7 @@ public class InputMan : MonoBehaviour {
 
 
     public bool player_pressed_action() {
-        if (Input.GetKey(KeyCode.Space) || Input.GetButton("Fire1")) {
+        if (Input.GetButton("Fire1")) {
             return true;
         }
 
@@ -81,6 +81,14 @@ public class InputMan : MonoBehaviour {
 
     public bool player_pressed_action3() {
         if (Input.GetButton("Fire3")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool player_pressed_action4() {
+        if (Input.GetButton("Jump")) {
             return true;
         }
 
@@ -178,6 +186,12 @@ public class InputMan : MonoBehaviour {
         return check_and_repeat_player_button_press(pressed, "action3");
     }
 
+    public bool player_pressed_action4_once() {
+        bool pressed = player_pressed_action4();
+
+        return check_and_repeat_player_button_press(pressed, "jump");
+    }
+
     public bool player_pressed_up_once() {
         bool pressed = player_pressed_up();
 
@@ -200,5 +214,28 @@ public class InputMan : MonoBehaviour {
         bool pressed = player_pressed_right();
 
         return check_and_repeat_player_button_press(pressed, "right");
+    }
+
+    public Vector3 get_mouse_position() {
+        /*
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100)) {
+            Debug.Log(hit.collider.gameObject);
+            Debug.DrawLine(ray.origin, hit.point);
+        }
+        */
+        var v3 = Input.mousePosition;
+        v3.z = Mathf.Abs(Camera.main.transform.position.z) - 4F;
+        v3 = Camera.main.ScreenToWorldPoint(v3);
+        //Debug.DrawLine(ray.origin, v3);
+
+        return v3;
+    }
+
+    public bool has_mouse_moved() {
+        return (Input.GetAxis("Mouse X") != 0) || (Input.GetAxis("Mouse Y") != 0);
     }
 }

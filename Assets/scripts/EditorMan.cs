@@ -52,19 +52,9 @@ public class EditorMan : MonoBehaviour {
             if (!menuman.displaying_menu) {
                 inputman.detectPressedKeyOrButton();
 
-                gameentity.center_camera_within_maze_bounds();
             }
             else {
                 hide_field_settings();
-            }
-
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit, 100)) {
-                Debug.Log(hit.collider.gameObject);
-                Debug.DrawLine(ray.origin, hit.point);
             }
         }
     }
@@ -89,8 +79,13 @@ public class EditorMan : MonoBehaviour {
         }
 
         if (inputman.player_pressed_action3_once()) {
+            gameentity.center_camera_within_maze_bounds();
             editor_settings();
             return;
+        }
+
+        if (inputman.player_pressed_action4_once()) {
+            gameentity.center_camera_within_maze_bounds();
         }
 
         if (editing_maze_field != null) {
@@ -120,6 +115,14 @@ public class EditorMan : MonoBehaviour {
         }
         if (inputman.player_pressed_left_once()) {
             pos_x--;
+            moved = true;
+        }
+
+        Vector3 mouse_position = inputman.get_mouse_position();
+
+        if (inputman.has_mouse_moved()) {
+            pos_x = Mathf.RoundToInt(mouse_position.x);
+            pos_y = Mathf.RoundToInt(mouse_position.y);
             moved = true;
         }
 
@@ -198,6 +201,15 @@ public class EditorMan : MonoBehaviour {
         // paint mode! if player kept pressing action, destroy wall between last and this one and call editor_action()
         if (inputman.player_action_button_down && (pos_x != previous_pos_x || pos_y != previous_pos_y)) {
             editor_action();
+
+            // do nothing if we have a diagonal move
+            // or the difference between coordinates is more than one field
+            if ((pos_x != previous_pos_x && pos_y != previous_pos_y) ||
+                (Mathf.Abs(pos_x - previous_pos_x) > 1 || Mathf.Abs(pos_y - previous_pos_y) > 1)) {
+
+                return;
+            }
+
             if (pos_x < previous_pos_x) {
                 mazeman.destroy_wall_at_coordinates(pos_x + 0.5F, pos_y);
             }
@@ -220,15 +232,21 @@ public class EditorMan : MonoBehaviour {
             return;
         }
 
-        // if no field at current pos, create field
-        if (!mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
-            mazeman.find_or_create_field_at_coordinates(pos_x, pos_y);
+        find_or_create_field_with_walls_at_coordinates(pos_x, pos_y);
+    }
 
+    public GameObject find_or_create_field_with_walls_at_coordinates(int x, int y) {
+
+        if (!mazeman.field_at_coordinates_exists(pos_x, pos_y)) {
             // add 4 walls
-            foreach (Coords coords in find_coordinates_around_pos(pos_x, pos_y)) {
+            foreach (Coords coords in find_coordinates_around_pos(x, y)) {
                 create_editor_wall_at_coordinates(coords.wall_coord_x, coords.wall_coord_y);
             }
         }
+
+        GameObject maze_field = mazeman.find_or_create_field_at_coordinates(x, y);
+
+        return maze_field;
     }
 
     void editor_cancel() {
