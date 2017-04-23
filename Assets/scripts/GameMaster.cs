@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class GameMaster : MonoBehaviour {
+public class GameMaster {
 
     public GameObject base_note_ingame;
     public GameObject player_sphere;
@@ -435,7 +435,11 @@ public class GameMaster : MonoBehaviour {
                             current_path.coord_x, current_path.coord_y
                         );
 
-                        GameObject redrawn_field = (GameObject)Instantiate(
+                        gameentity.play_maze_field_note(
+                            gameentity.get_maze_field_script_from_game_object(redrawing_maze_field)
+                        );
+
+                        GameObject redrawn_field = (GameObject)MonoBehaviour.Instantiate(
                             gameentity.redrawing_field,
                             new Vector3(
                                 redrawing_maze_field.transform.position.x,
@@ -454,7 +458,7 @@ public class GameMaster : MonoBehaviour {
                 maze_path_redraw_rate_counter = 0;
             }
 
-            yield return null;
+            yield return new WaitForSeconds(0.2F);
         }
 
         if (player_saved_paths.Count == 0) {

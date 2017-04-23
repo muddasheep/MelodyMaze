@@ -148,9 +148,12 @@ public class GameEntity : MonoBehaviour {
         menuman.displaying_menu = false;
         mazeman.maze_initialized = 0;
 
-        if (gamemaster != null && gamemaster.base_note_ingame != null) {
-            Destroy(gamemaster.base_note_ingame);
+        if (gamemaster != null) {
             gamemaster.base_note_ingame = null;
+        }
+
+        if (gamemaster.base_note_ingame != null) {
+            Destroy(gamemaster.base_note_ingame);
         }
 
         if (camera_target) {
