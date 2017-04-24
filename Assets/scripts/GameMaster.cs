@@ -439,16 +439,19 @@ public class GameMaster {
                             gameentity.get_maze_field_script_from_game_object(redrawing_maze_field)
                         );
 
-                        GameObject redrawn_field = (GameObject)MonoBehaviour.Instantiate(
-                            gameentity.redrawing_field,
-                            new Vector3(
-                                redrawing_maze_field.transform.position.x,
-                                redrawing_maze_field.transform.position.y,
-                                redrawing_maze_field.transform.position.z - 1F
-                            ),
-                            Quaternion.identity
+                        gameentity.smooth_move(
+                            redrawing_maze_field.transform.position,
+                            new Vector3(redrawing_maze_field.transform.position.x, redrawing_maze_field.transform.position.y, 5F),
+                            2F, 0F, redrawing_maze_field
                         );
-                        redrawn_field.transform.parent = redrawing_maze_field.transform;
+
+                        Vector3 angles =
+                            Vector3.up * (20 + Random.Range(0.0f, 70.0f)) +
+                            Vector3.down * (20 + Random.Range(0.0f, 70.0f)) +
+                            Vector3.left * (20 + Random.Range(0.0f, 70.0f)) +
+                            Vector3.right * (20 + Random.Range(0.0f, 70.0f));
+
+                        gameentity.start_coroutine(gameentity.rotate_object(redrawing_maze_field, angles, 1F));
 
                         path.redrawn_counter++;
                         player_saved_paths_altered.Add(path);
@@ -458,7 +461,7 @@ public class GameMaster {
                 maze_path_redraw_rate_counter = 0;
             }
 
-            yield return new WaitForSeconds(0.2F);
+            yield return new WaitForSeconds(0.1F);
         }
 
         if (player_saved_paths.Count == 0) {

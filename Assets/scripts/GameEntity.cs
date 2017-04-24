@@ -194,8 +194,6 @@ public class GameEntity : MonoBehaviour {
         return camera_target.transform.position;
     }
 
-    public GameObject redrawing_field;
-
 	public Vector3 get_random_offscreen_position(float target_z) {
 		float target_x = Random.Range(-16F, 16F);
 		float target_y = 7F;
