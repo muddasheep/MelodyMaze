@@ -33,15 +33,17 @@ public class GameEntity : MonoBehaviour {
 	EditorMan editorman;
     GameMaster gamemaster;
     SoundMan soundman;
+    StorageMan storageman;
 
 	// Use this for initialization
 	void Start () {
 
-        inputman  = GetComponent<InputMan>();
-        mazeman   = GetComponent<MazeMan>();
-		menuman   = GetComponent<MenuMan>();
-        editorman = GetComponent<EditorMan>();
-        soundman  = GetComponent<SoundMan>();
+        inputman   = GetComponent<InputMan>();
+        mazeman    = GetComponent<MazeMan>();
+		menuman    = GetComponent<MenuMan>();
+        editorman  = GetComponent<EditorMan>();
+        soundman   = GetComponent<SoundMan>();
+        storageman = GetComponent<StorageMan>();
 
         initial_cam_position = gameObject.transform.position;
 
@@ -128,10 +130,37 @@ public class GameEntity : MonoBehaviour {
         smooth_move(camera_target.transform.position, new Vector3(9F, 2F, -4.6F), 5F, 0.5F, camera_target);
     }
 
-	public void start_random_game() {
+    public void start_game() {
+        destroy_title_screen();
+        current_level = 1;
+
+        start_current_level();
+
+        game_running = true;
+    }
+
+    public void start_current_level() {
+        gamemaster = new GameMaster { inputman = inputman, mazeman = mazeman, gameentity = this };
+
+        StorageMan.Maze maze = storageman.load_from_json(current_level);
+        mazeman.build_maze_from_maze_class(maze);
+        mazeman.maze_initialized = 4;
+
+        GameObject last_maze_field = mazeman.maze_field_coordinates_hash[mazeman.coordinates_to_array_index(
+            mazeman.maze_boundary_highest_x, mazeman.maze_boundary_highest_y
+        )];
+
+        summon_base_note(new Vector3(
+            last_maze_field.transform.position.x,
+            last_maze_field.transform.position.y,
+            last_maze_field.transform.position.z - 1F
+        ));
+    }
+
+    public void start_random_game() {
         destroy_title_screen();
         gamemaster = new GameMaster { inputman = inputman, mazeman = mazeman, gameentity = this };
-        mazeman.build_maze();
+        mazeman.build_random_maze();
 		game_running = true;
         current_level = -1;
     }
@@ -142,19 +171,43 @@ public class GameEntity : MonoBehaviour {
 		editor_running = true;
 	}
 
+    public void end_level() {
+        if (current_level == -1) {
+            return_to_title();
+
+            return;
+        }
+
+        StopAllCoroutines();
+
+        mazeman.maze_initialized = 0;
+        destroy_base_note();
+        gamemaster = null;
+        mazeman.clean_maze();
+        reset_camera();
+        turn_off_the_fog_machine();
+
+        current_level++;
+
+        while (current_level <= 99) {
+            if (editorman.level_file_exists(current_level)) {
+                start_current_level();
+                return;
+            }
+
+            current_level++;
+        }
+
+        return_to_title();
+    }
+
     public void return_to_title() {
         game_running = false;
         editor_running = false;
         menuman.displaying_menu = false;
         mazeman.maze_initialized = 0;
 
-        if (gamemaster != null) {
-            gamemaster.base_note_ingame = null;
-        }
-
-        if (gamemaster.base_note_ingame != null) {
-            Destroy(gamemaster.base_note_ingame);
-        }
+        destroy_base_note();
 
         if (camera_target) {
             Destroy(camera_target);
@@ -178,6 +231,13 @@ public class GameEntity : MonoBehaviour {
         gamemaster.player_coord_y = (int)new_position.y;
         camera_target = gamemaster.base_note_ingame;
         adjust_camera();
+    }
+
+    public void destroy_base_note() {
+        if (gamemaster != null && gamemaster.base_note_ingame != null) {
+            Destroy(gamemaster.base_note_ingame);
+            gamemaster.base_note_ingame = null;
+        }
     }
 
     public GameObject summon_player_sphere() {

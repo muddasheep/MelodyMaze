@@ -38,7 +38,7 @@ public class MenuMan : MonoBehaviour {
 
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
-		start_menu.Add(new MenuItem { text = "New Game" });
+		start_menu.Add(new MenuItem { text = "Campaign" });
 		start_menu.Add(new MenuItem { text = "Random" });
 		start_menu.Add(new MenuItem { text = "Create" });
 		start_menu.Add(new MenuItem { text = "Credits" });
@@ -70,7 +70,10 @@ public class MenuMan : MonoBehaviour {
 
 			MenuItem selected_item = current_menu[index];
 
-			if (selected_item.text == "Random") {
+            if (selected_item.text == "Campaign") {
+                gameentity.start_game();
+            }
+            if (selected_item.text == "Random") {
 				gameentity.start_random_game();
 			}
 			if (selected_item.text == "Create") {

@@ -46,22 +46,18 @@ public class maze_field_script : MonoBehaviour {
 	}
 
 	public void remove_bottom() {
-		//Destroy( wall_bottom );
 		wall_bottom_removed = true;
 		removed_sides++;
 	}
 	public void remove_top() {
-		//Destroy( wall_top );
 		wall_top_removed = true;
 		removed_sides++;
 	}
 	public void remove_right() {
-		//Destroy( wall_right );
 		wall_right_removed = true;
 		removed_sides++;
 	}
 	public void remove_left() {
-		//Destroy( wall_left );
 		wall_left_removed = true;
 		removed_sides++;
 	}

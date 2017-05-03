@@ -635,32 +635,7 @@ public class EditorMan : MonoBehaviour {
         if (level_file_exists(level_number)) {
            current_level = level_number;
            StorageMan.Maze maze = storageman.load_from_json(level_number);
-           build_maze_from_maze_class(maze);
-        }
-    }
-
-    void build_maze_from_maze_class(StorageMan.Maze maze) {
-        mazeman.clean_maze();
-
-        foreach (StorageMan.MazeWall maze_wall in maze.walls) {
-            create_editor_wall_at_coordinates(maze_wall.x, maze_wall.y);
-        }
-
-        foreach (StorageMan.MazeField maze_field in maze.fields) {
-            GameObject new_field = mazeman.find_or_create_field_at_coordinates(Mathf.RoundToInt(maze_field.x), Mathf.RoundToInt(maze_field.y));
-
-            maze_field_script field_script = gameentity.get_maze_field_script_from_game_object(new_field);
-
-            if (maze_field.base_note) {
-                mazeman.set_field_to_base_note(new_field);
-            }
-            if (maze_field.target_note) {
-                mazeman.set_field_to_target_note(new_field, field_script);
-            }
-
-            field_script.save_note(maze_field.note);
-
-            field_script.instrument = maze_field.instrument;
+           mazeman.build_maze_from_maze_class(maze);
         }
     }
 

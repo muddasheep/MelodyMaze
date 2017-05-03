@@ -287,8 +287,47 @@ public class MazeMan : MonoBehaviour {
             maze_deconstruction_initialized = true;
         }
     }
-	
-	public void build_maze() {
+
+    public void build_maze_from_maze_class(StorageMan.Maze maze) {
+        clean_maze();
+
+        foreach (StorageMan.MazeWall maze_wall in maze.walls) {
+            find_or_create_wall_at_coordinates(maze_wall.x, maze_wall.y);
+        }
+
+        foreach (StorageMan.MazeField maze_field in maze.fields) {
+            GameObject new_field = find_or_create_field_at_coordinates(Mathf.RoundToInt(maze_field.x), Mathf.RoundToInt(maze_field.y));
+
+            maze_field_script field_script = gameentity.get_maze_field_script_from_game_object(new_field);
+
+            if (maze_field.base_note) {
+                set_field_to_base_note(new_field);
+            }
+            if (maze_field.target_note) {
+                set_field_to_target_note(new_field, field_script);
+            }
+
+            field_script.save_note(maze_field.note);
+
+            field_script.instrument = maze_field.instrument;
+
+            // set variables to removed depending on walls found around maze field
+            if (!wall_at_coordinates_exists(field_script.coord_x + 0.5F, field_script.coord_y)) {
+                field_script.remove_right();
+            }
+            if (!wall_at_coordinates_exists(field_script.coord_x - 0.5F, field_script.coord_y)) {
+                field_script.remove_left();
+            }
+            if (!wall_at_coordinates_exists(field_script.coord_x, field_script.coord_y + 0.5F)) {
+                field_script.remove_top();
+            }
+            if (!wall_at_coordinates_exists(field_script.coord_x, field_script.coord_y - 0.5F)) {
+                field_script.remove_bottom();
+            }
+        }
+    }
+
+    public void build_random_maze() {
 		while (maze_initialized < 4) {
 			GameObject last_maze_field;
 			int difficulty_steps = 10;
@@ -303,10 +342,9 @@ public class MazeMan : MonoBehaviour {
         set_field_to_base_note(find_or_create_field_at_coordinates(0, 0));
 
         if (maze_initialized == 4) {
-			// draw corners
+
 			draw_maze_corners();
 			
-			// draw walls
 			draw_maze_walls();
 		}
 	}
@@ -359,7 +397,7 @@ public class MazeMan : MonoBehaviour {
 
         StopAllCoroutines();
         clean_maze();
-        gameentity.return_to_title();
+        gameentity.end_level();
     }
 
     public void finish_maze_destruction(float delay_seconds) {

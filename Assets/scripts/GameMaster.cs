@@ -161,9 +161,11 @@ public class GameMaster {
         gameentity.camera_target = player_sphere;
 
         player_sphere_moving = true;
-        player_target_position = new Vector3(0F, 0.0F, -4.3F);
-        player_coord_x = 0;
-        player_coord_y = 0;
+        player_target_position = new Vector3(
+            base_note_ingame.transform.position.x, base_note_ingame.transform.position.y, -4.3F
+        );
+        player_coord_x = Mathf.RoundToInt(base_note_ingame.transform.position.x);
+        player_coord_y = Mathf.RoundToInt(base_note_ingame.transform.position.y);
     }
 
     public void spawn_player_sphere(float delay_seconds) {
@@ -192,7 +194,11 @@ public class GameMaster {
             base_note_script next_base_note_script = gameentity.get_base_note_script_from_game_object(base_note_ingame);
             next_base_note_script.set_up_base_camp();
 
-            gameentity.smooth_move(player_sphere.transform.position, new Vector3(0F, 0F, -4.7F), 0.5F, 0F, player_sphere);
+            gameentity.smooth_move(
+                player_sphere.transform.position,
+                new Vector3(hover_field.transform.position.x, hover_field.transform.position.y, -4.7F),
+                0.5F, 0F, player_sphere
+            );
             gameentity.smooth_adjust_camera(hover_field.transform.position.x, hover_field.transform.position.y);
         }
     }
