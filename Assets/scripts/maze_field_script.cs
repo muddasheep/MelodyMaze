@@ -10,6 +10,8 @@ public class maze_field_script : MonoBehaviour {
     public int instrument = 0;
     public GameObject linked_target_note { get; set; }
 
+    public AudioSource field_audio_source;
+
     public GameObject note_sprite;
     GameObject note_indicator;
     public GameObject maze_wall;
@@ -61,6 +63,19 @@ public class maze_field_script : MonoBehaviour {
 		wall_left_removed = true;
 		removed_sides++;
 	}
+
+    public void attach_sound_source() {
+        field_audio_source = gameObject.AddComponent<AudioSource>();
+        field_audio_source.spatialBlend = 1f;
+        field_audio_source.minDistance = 2;
+        field_audio_source.maxDistance = 25;
+
+        field_audio_source.rolloffMode = AudioRolloffMode.Linear;
+    }
+
+    public AudioSource get_sound_source() {
+        return field_audio_source;
+    }
 
 	public void quake(float magnification, float delay) {
 		StopAllCoroutines();

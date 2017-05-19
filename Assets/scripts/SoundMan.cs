@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class SoundMan : MonoBehaviour {
 	public GameObject sounds_source;
 
-    float scale = Mathf.Pow(2f, 1.0f / 12f);
+    public float scale = Mathf.Pow(2f, 1.0f / 12f);
 
     public class AudioSourceData {
         
@@ -55,8 +55,13 @@ public class SoundMan : MonoBehaviour {
         sound_player.Play();
 	}
 
+    public string get_instrument_file_path(string instrument_type, string note) {
+
+        return "instruments/" + instrument_type + "/" + instrument_type + "_" + note;
+    }
+
     public void play_instrument_sound(string instrument_type, string note, int pitch_amount = 0) {
-        play_sound("instruments/" + instrument_type + "/" + instrument_type + "_" + note, pitch_amount);
+        play_sound(get_instrument_file_path(instrument_type, note), pitch_amount);
     }
 
     IEnumerator fade_out_sound(AudioSource the_source) {

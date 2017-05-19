@@ -200,6 +200,9 @@ public class GameMaster {
                 0.5F, 0F, player_sphere
             );
             gameentity.smooth_adjust_camera(hover_field.transform.position.x, hover_field.transform.position.y);
+            mazeman.base_note_field_script.get_sound_source().Stop();
+            mazeman.base_note_field_script.get_sound_source().loop = false;
+            mazeman.base_note_field_script.get_sound_source().Play();
         }
     }
 

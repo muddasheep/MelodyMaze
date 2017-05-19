@@ -16,6 +16,8 @@ public class MazeMan : MonoBehaviour {
     public List<GameObject> maze_notes = new List<GameObject>();
     public GameObject base_note;
 
+    public maze_field_script base_note_field_script;
+
     public bool maze_deconstruction = false;
     bool maze_deconstruction_initialized = false;
 
@@ -90,6 +92,8 @@ public class MazeMan : MonoBehaviour {
         base_note.transform.parent = maze_field.transform;
         maze_field_script new_maze_field_script = gameentity.get_maze_field_script_from_game_object(maze_field);
         new_maze_field_script.is_base_note = true;
+        new_maze_field_script.attach_sound_source();
+        base_note_field_script = new_maze_field_script;
     }
 
     public void remove_base_note() {
@@ -104,6 +108,7 @@ public class MazeMan : MonoBehaviour {
             }
             Destroy(base_note);
             base_note = null;
+            base_note_field_script = null;
         }
     }
 
@@ -340,6 +345,7 @@ public class MazeMan : MonoBehaviour {
 		}
 
         set_field_to_base_note(find_or_create_field_at_coordinates(0, 0));
+        base_note_field_script.note = gameentity.notes[Random.Range(0, gameentity.notes.Count)];
 
         if (maze_initialized == 4) {
 

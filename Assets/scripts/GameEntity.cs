@@ -155,6 +155,8 @@ public class GameEntity : MonoBehaviour {
             last_maze_field.transform.position.y,
             last_maze_field.transform.position.z - 1F
         ));
+
+        play_maze_field_note_at_maze_field(mazeman.base_note_field_script);
     }
 
     public void start_random_game() {
@@ -163,9 +165,11 @@ public class GameEntity : MonoBehaviour {
         mazeman.build_random_maze();
 		game_running = true;
         current_level = -1;
+
+        play_maze_field_note_at_maze_field(mazeman.base_note_field_script);
     }
-	
-	public void start_editor() {
+
+    public void start_editor() {
         destroy_title_screen();
         editorman.prepare_editor();
 		editor_running = true;
@@ -326,6 +330,18 @@ public class GameEntity : MonoBehaviour {
 
 		return next_maze_script;
 	}
+
+    public void play_maze_field_note_at_maze_field(maze_field_script given_maze_field) {
+
+        Debug.Log("sounds/" + soundman.get_instrument_file_path(instrument_names[given_maze_field.instrument], given_maze_field.note));
+        Debug.Log(given_maze_field);
+        AudioClip clip = Resources.Load<AudioClip>("sounds/" + soundman.get_instrument_file_path(instrument_names[given_maze_field.instrument], given_maze_field.note));
+        AudioSource sound_sauce = given_maze_field.get_sound_source();
+        sound_sauce.clip = clip;
+        sound_sauce.pitch = Mathf.Pow(soundman.scale, -12);
+        sound_sauce.loop = true;
+        sound_sauce.Play();
+    }
 
     public void play_maze_field_note(maze_field_script given_maze_field) {
 
