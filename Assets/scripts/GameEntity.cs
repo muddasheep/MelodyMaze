@@ -34,6 +34,7 @@ public class GameEntity : MonoBehaviour {
     GameMaster gamemaster;
     SoundMan soundman;
     StorageMan storageman;
+    LocalizationManager localizationman;
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +45,9 @@ public class GameEntity : MonoBehaviour {
         editorman  = GetComponent<EditorMan>();
         soundman   = GetComponent<SoundMan>();
         storageman = GetComponent<StorageMan>();
+        localizationman = GetComponent<LocalizationManager>();
+
+        Debug.Log(localizationman.GetLocalizedValue("hello"));
 
         initial_cam_position = gameObject.transform.position;
 

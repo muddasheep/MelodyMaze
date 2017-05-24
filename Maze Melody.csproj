@@ -84,6 +84,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\LocalizationData.cs" />
+    <Compile Include="Assets\_Scripts\LocalizationManager.cs" />
+    <Compile Include="Assets\_Scripts\LocalizedText.cs" />
     <Compile Include="Assets\scripts\EditorMan.cs" />
     <Compile Include="Assets\scripts\GameEntity.cs" />
     <Compile Include="Assets\scripts\GameMaster.cs" />
