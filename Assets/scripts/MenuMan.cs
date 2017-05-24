@@ -38,7 +38,7 @@ public class MenuMan : MonoBehaviour {
 
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
-		start_menu.Add(new MenuItem { text = "Campaign" });
+		start_menu.Add(new MenuItem { text = gameentity.get_localized_value("menu_campaign") });
 		start_menu.Add(new MenuItem { text = "Random" });
 		start_menu.Add(new MenuItem { text = "Create" });
 		start_menu.Add(new MenuItem { text = "Credits" });
