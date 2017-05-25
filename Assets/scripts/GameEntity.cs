@@ -47,15 +47,18 @@ public class GameEntity : MonoBehaviour {
         storageman = GetComponent<StorageMan>();
         localizationman = GetComponent<LocalizationManager>();
 
-        Debug.Log(get_localized_value("hello"));
+        Debug.Log(get_localized_text_value("hello"));
 
         initial_cam_position = gameObject.transform.position;
 
         start_time = Time.time;
 	}
 
-    public string get_localized_value(string key) {
-        return localizationman.GetLocalizedValue(key);
+	public Font get_localized_font_value(string key) {
+		return localizationman.GetLocalizedFontValue(key);
+	}
+	public string get_localized_text_value(string key) {
+        return localizationman.GetLocalizedTextValue(key);
     }
 
 	// Update is called once per frame

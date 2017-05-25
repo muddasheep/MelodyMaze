@@ -11,7 +11,9 @@ public class LocalizedText: MonoBehaviour {
 		SetToLocalizedText();
 	}
 	public void SetToLocalizedText() {
-		GetComponent<Text>().text = LocalizationManager.instance.GetLocalizedValue(key);
+
+		GetComponent<Text>().font = LocalizationManager.instance.GetLocalizedFontValue(key);
+		GetComponent<Text>().text = LocalizationManager.instance.GetLocalizedTextValue(key);
 	}
 
 }
