@@ -15,7 +15,8 @@ public class MenuMan : MonoBehaviour {
 
 	public class MenuItem {
 		public string text { get; set; }
-        public string value { get; set; }
+		public Font font { get; set; }
+		public string value { get; set; }
         public GameObject my_object { get; set; }
 		public bool highlighted { get; set; }
 	}
@@ -38,7 +39,7 @@ public class MenuMan : MonoBehaviour {
 
 		menu_item_highlighter_object = (GameObject)Instantiate(menu_item_highlighter);
 
-		start_menu.Add(new MenuItem { text = gameentity.get_localized_value("menu_campaign") });
+		start_menu.Add(new MenuItem { text = gameentity.get_localized_text_value("menu_campaign"), font = gameentity.get_localized_font_value("menu_campaign") });
 		start_menu.Add(new MenuItem { text = "Random" });
 		start_menu.Add(new MenuItem { text = "Create" });
 		start_menu.Add(new MenuItem { text = "Credits" });
@@ -168,8 +169,14 @@ public class MenuMan : MonoBehaviour {
             item.highlighted = false;
 
 			menu_item_script menu_script = (menu_item_script)item.my_object.GetComponent(typeof(menu_item_script));
-
+			
 			menu_script.menu_text.text = item.text;
+
+			// alex
+			if (item.font != null) {
+				menu_script.menu_text.font = item.font;
+				menu_script.menu_text.GetComponent<Renderer>().material = item.font.material; // needed to get all Arabic glyphs
+			}
 
 			if (index == highlight_index) {
 				highlighted_menu_item = item.my_object;
@@ -280,8 +287,8 @@ public class MenuMan : MonoBehaviour {
 
         TextMesh summoned_title_text_mesh = summoned_title_text.GetComponentInChildren<TextMesh>();
         summoned_title_text_mesh.text = text;
-
-        summoned_title_text.transform.parent = parent.transform;
+		
+		summoned_title_text.transform.parent = parent.transform;
 
         return summoned_title_text;
     }

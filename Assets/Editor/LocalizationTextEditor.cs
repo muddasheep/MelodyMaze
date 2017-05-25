@@ -8,6 +8,8 @@ public class LocalizationTextEditor : EditorWindow {
 
 	public LocalizationData localizationData;
 
+	private Vector2 scrollPos;
+
 	[MenuItem("Alex/Localization Text Editor")]
 	static void Init() {
 		EditorWindow.GetWindow(typeof(LocalizationTextEditor)).Show();
@@ -15,10 +17,17 @@ public class LocalizationTextEditor : EditorWindow {
 
 	private void OnGUI() {
 		if (localizationData != null) {
+
+			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+			
 			SerializedObject serializedObject = new SerializedObject(this);
 			SerializedProperty serializedProperty = serializedObject.FindProperty("localizationData");
 			EditorGUILayout.PropertyField(serializedProperty, true);
+
+			EditorGUILayout.EndScrollView();
+
 			serializedObject.ApplyModifiedProperties();
+
 
 			if (GUILayout.Button ("Save data")) {
 				SaveGameData();
