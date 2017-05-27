@@ -35,6 +35,7 @@ public class GameEntity : MonoBehaviour {
     SoundMan soundman;
     StorageMan storageman;
     LocalizationManager localizationman;
+    ComicMan comicman;
 
 	// Use this for initialization
 	void Start () {
@@ -45,16 +46,22 @@ public class GameEntity : MonoBehaviour {
         editorman  = GetComponent<EditorMan>();
         soundman   = GetComponent<SoundMan>();
         storageman = GetComponent<StorageMan>();
+        comicman   = GetComponent<ComicMan>();
         localizationman = GetComponent<LocalizationManager>();
-
-        Debug.Log(get_localized_text_value("hello"));
 
         initial_cam_position = gameObject.transform.position;
 
         start_time = Time.time;
-	}
 
-	public Font get_localized_font_value(string key) {
+        Debug.Log(get_localized_text_value("hello"));
+
+        comicman.create_comic_panel(0F, 0F, -9F, 1F, 2F);
+        comicman.create_comic_panel(1.1F, 0F, -9F, 2F, 2F);
+        comicman.create_comic_panel(0F, 2.1F, -9F, 2F, 2F);
+        comicman.create_comic_panel(2.1F, 2.1F, -9F, 1F, 2F);
+    }
+
+    public Font get_localized_font_value(string key) {
 		return localizationman.GetLocalizedFontValue(key);
 	}
 	public string get_localized_text_value(string key) {

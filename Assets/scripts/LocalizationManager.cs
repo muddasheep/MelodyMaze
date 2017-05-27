@@ -8,9 +8,10 @@ public class LocalizationManager: MonoBehaviour {
 
 	public static LocalizationManager instance;
 	public string defaultLoadLocalizedText;
+	public Font cairoFont;
 
 	private Dictionary<string, string> localizedText;
-	private Dictionary<string, Font> localizedFont;
+	private Dictionary<string, string> localizedFont;
 	private bool isArabic = false;
 	private bool isReady = false;
 	private string missingTextString = "Localized text string NOT found";
@@ -22,7 +23,7 @@ public class LocalizationManager: MonoBehaviour {
 
 	public void LoadLocalizedText(string fileName) {
 		localizedText = new Dictionary<string, string>();
-		localizedFont = new Dictionary<string, Font>();
+		localizedFont = new Dictionary<string, string>();
 		string filePath = Path.Combine(Application.streamingAssetsPath, fileName);
 
 		if (File.Exists(filePath)) {
@@ -35,8 +36,8 @@ public class LocalizationManager: MonoBehaviour {
 					localizedText.Add(loadedData.localizationItems[i].key, loadedData.localizationItems[i].value);
 
 					// set "localizedFont" dictionary value to the font in json
-					Font tempFont = loadedData.localizationItems[i].overrideLanguageFont;
-					if (tempFont == null) {
+					string tempFont = loadedData.localizationItems[i].overrideLanguageFont;
+					if (tempFont == "") {
 						tempFont = loadedData.defaultLanguageFont;
 					}
 					localizedFont.Add(loadedData.localizationItems[i].key, tempFont);
@@ -60,7 +61,10 @@ public class LocalizationManager: MonoBehaviour {
 	public Font GetLocalizedFontValue(string key) {
 		Font result = null;
 		if (localizedText.ContainsKey(key)) {
-			result = localizedFont[key];
+			if (localizedFont[key] == "cairo") { // if the result of the key is "cairo" font
+				result = cairoFont;
+			}
+			
 		}
 
 		return result;
