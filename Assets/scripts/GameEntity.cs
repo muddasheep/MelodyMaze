@@ -55,14 +55,10 @@ public class GameEntity : MonoBehaviour {
 
         Debug.Log(get_localized_text_value("hello"));
 
-        ComicMan.ComicPanel panel1 = comicman.create_comic_panel(0F, 0F, -9F, 1F, 2F);
-        panel1.add_character("dad");
-        panel1.character_says(0, "Hey Kid");
-        ComicMan.ComicPanel panel2 = comicman.create_comic_panel(1.1F, 0F, -9F, 2F, 2F);
-        panel2.add_character("son");
-        panel2.character_says(0, "Hey Dad");
-        comicman.create_comic_panel(0F, 2.1F, -9F, 2F, 2F).add_character("son");
+        comicman.create_comic_panel(0F, 2.1F, -9F, 2F, 2F).add_character("son").character_says(0, "Hey dad, I know what you did last summer");
+        comicman.create_comic_panel(0F, 0F, -9F, 1F, 2F).add_character("dad").character_says(0, "oh... that's ok.");
         comicman.create_comic_panel(2.1F, 2.1F, -9F, 1F, 2F).add_character("dad");
+        comicman.create_comic_panel(1.1F, 0F, -9F, 2F, 2F).add_character("son").character_says(0, "cool");
     }
 
     public Font get_localized_font_value(string key) {

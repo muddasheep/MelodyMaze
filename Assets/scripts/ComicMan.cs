@@ -5,6 +5,7 @@ using UnityEngine;
 public class ComicMan : MonoBehaviour {
 
     public GameObject default_comic_panel;
+    public GameObject comic_bubble_text;
     public List<ComicPanel> comic_panels { get; set; }
 
     public class ComicPanel {
@@ -32,7 +33,7 @@ public class ComicMan : MonoBehaviour {
         }
 
         // attaches image of character x with emotion y, i.e. son_rise.jpg, dad_serious.jpg
-        public GameObject add_character(string character_name, string character_emote = "normal") {
+        public ComicPanel add_character(string character_name, string character_emote = "normal") {
             var character = new GameObject();
             character.transform.parent = panel.transform;
             character.transform.localPosition = new Vector3(0, 0, -0.75F);
@@ -43,16 +44,16 @@ public class ComicMan : MonoBehaviour {
 
             characters.Add(character);
 
-            return character;
+            return this;
         }
 
         public void character_says(int character_index, string text) {
             GameObject chosen_character = characters[character_index];
 
-            comicman.create_speech_bubble(
+            GameObject bubble = comicman.create_speech_bubble(
                 new Vector3(chosen_character.transform.position.x, chosen_character.transform.position.y + 0.5f, chosen_character.transform.position.z - 1f),
                 new Vector3(chosen_character.transform.position.x + chosen_character.GetComponent<SpriteRenderer>().sprite.bounds.size.x / 2, chosen_character.transform.position.y, chosen_character.transform.position.z - 1f),
-                this
+                this, text
             );
         }
     }
@@ -76,22 +77,27 @@ public class ComicMan : MonoBehaviour {
         return new_panel;
     }
 
-    GameObject create_speech_bubble(Vector3 speech_position, Vector3 character_position, ComicPanel panel) {
+    GameObject create_speech_bubble(Vector3 speech_position, Vector3 character_position, ComicPanel panel, string text) {
 
         float speech_width = 1f;
         float speech_height = 0.5f;
 
-        float start_x = speech_position.x - speech_width / 2;
-        float start_y = speech_position.y + speech_height / 2;
-        float end_x = speech_position.x + speech_width / 2;
-        float end_y = speech_position.y - speech_height / 2;
         float bubblez = speech_position.z;
 
         GameObject bubble = new GameObject();
 
+        GameObject bubble_text = (GameObject)Instantiate(comic_bubble_text);
+        bubble_text.transform.parent = bubble.transform;
+        bubble_text.transform.position = new Vector3(speech_position.x, speech_position.y, bubblez - 0.30f);
+        TextMesh bubble_text_mesh = bubble_text.transform.GetChild(0).gameObject.GetComponent<TextMesh>();
+        bubble_text_mesh.text = text;
+
+        speech_width = get_mesh_width(bubble_text_mesh);
+        float start_x = speech_position.x - speech_width / 2;
+        float end_x = speech_position.x + speech_width / 2;
+
         LineRenderer bubble_background = DrawLine(new Vector3(start_x, speech_position.y, bubblez + 0.1f), new Vector3(end_x, speech_position.y, bubblez + 0.1f), Color.white, bubble, speech_height, speech_height);
         bubble_background.numCapVertices = 0;
-
 
         LineRenderer bubble_background_shadow = DrawLine(new Vector3(start_x - 0.1f, speech_position.y - 0.1f, bubblez + 0.2f), new Vector3(end_x + 0.1f, speech_position.y + 0.1f, bubblez + 0.2f), Color.black, bubble, speech_height + 0.2f, speech_height + 0.2f);
         bubble_background_shadow.numCapVertices = 0;
@@ -107,6 +113,18 @@ public class ComicMan : MonoBehaviour {
         bubble_arrow_shadow.endWidth = 0;
 
         return bubble;
+    }
+
+    public float get_mesh_width(TextMesh mesh) {
+        float width = 0;
+        foreach (char symbol in mesh.text) {
+            CharacterInfo info;
+            if (mesh.font.GetCharacterInfo(symbol, out info, mesh.fontSize, mesh.fontStyle)) {
+                width += info.advance;
+            }
+        }
+
+        return width * mesh.characterSize * 0.1f * 0.1f + 0.2f;
     }
 
     LineRenderer DrawLine(Vector3 start, Vector3 end, Color color, GameObject panel, float start_width = 0.05f, float end_width = 0.05f) {
