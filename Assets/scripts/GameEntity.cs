@@ -15,6 +15,7 @@ public class GameEntity : MonoBehaviour {
 
 	public bool game_running = false;
     public bool editor_running = false;
+    public bool comic_sequence_running = false;
     public int current_level = 0; // -1 = random
 
     public List<string> instrument_names = new List<string> {
@@ -55,10 +56,15 @@ public class GameEntity : MonoBehaviour {
 
         Debug.Log(get_localized_text_value("hello"));
 
-        comicman.create_comic_panel(0F, 2.1F, -9F, 2F, 2F).add_character("son").character_says(0, "Hey dad, I know what you did last summer");
-        comicman.create_comic_panel(0F, 0F, -9F, 1F, 2F).add_character("dad").character_says(0, "oh... that's ok.");
-        comicman.create_comic_panel(2.1F, 2.1F, -9F, 1F, 2F).add_character("dad");
-        comicman.create_comic_panel(1.1F, 0F, -9F, 2F, 2F).add_character("son").character_says(0, "cool");
+        ComicMan.ComicSequence test_sequence = comicman.create_comic_sequence().initialize();
+        ComicMan.ComicStrip test_strip = test_sequence.create_comic_strip().initialize();
+        test_strip.create_comic_panel(0F, 2.1F, -9F, 2F, 2F).add_character("son").character_says(0, "Hey dad, I know what you did last summer");
+        test_strip.create_comic_panel(0F, 0F, -9F, 1F, 2F).add_character("dad").character_says(0, "oh... that's ok.");
+        test_strip.create_comic_panel(2.1F, 2.1F, -9F, 1F, 2F).add_character("dad");
+        test_strip.create_comic_panel(1.1F, 0F, -9F, 2F, 2F).add_character("son").character_says(0, "cool");
+        ComicMan.ComicStrip test_strip2 = test_sequence.create_comic_strip().initialize();
+        test_strip2.create_comic_panel(0F, 2.1F, -9F, 4F, 4F).add_character("son").character_says(0, "I guess");
+        start_comic_sequence();
     }
 
     public Font get_localized_font_value(string key) {
@@ -72,7 +78,14 @@ public class GameEntity : MonoBehaviour {
 	void FixedUpdate () {
 		current_time = Time.time - start_time;
 
-        if (game_running) {
+        if (comic_sequence_running) {
+            if (inputman.player_pressed_action_once()) {
+                if(!comicman.next_strip()) {
+                    comic_sequence_running = false;
+                }
+            }
+        }
+        else if (game_running) {
 
             if (mazeman.maze_deconstruction == true) {
                 gamemaster.deconstruct_maze();
@@ -146,6 +159,12 @@ public class GameEntity : MonoBehaviour {
         camera_target = summon_player_sphere();
         camera_target.transform.position = new Vector3(-9F, 2F, -4.6F);
         smooth_move(camera_target.transform.position, new Vector3(9F, 2F, -4.6F), 5F, 0.5F, camera_target);
+    }
+
+    public void start_comic_sequence() {
+
+        comic_sequence_running = true;
+        comicman.start_sequence();
     }
 
     public void start_game() {

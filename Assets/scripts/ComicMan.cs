@@ -6,7 +6,110 @@ public class ComicMan : MonoBehaviour {
 
     public GameObject default_comic_panel;
     public GameObject comic_bubble_text;
-    public List<ComicPanel> comic_panels { get; set; }
+
+    ComicSequence current_comic_sequence;
+
+    public void start_sequence() {
+        current_comic_sequence.next_strip();
+    }
+
+    public bool next_strip() {
+        return current_comic_sequence.next_strip();
+    }
+
+    public class ComicSequence {
+        // has comic strips, each strip gets displayed one after another
+        public List<ComicStrip> comic_strips { get; set; }
+        public ComicMan comicman { get; set; }
+        public int current_comic_strip { get; set; }
+
+        public ComicSequence initialize() {
+            comic_strips = new List<ComicStrip>();
+
+            current_comic_strip = -1;
+
+            return this;
+        }
+
+        public ComicStrip create_comic_strip() {
+            ComicStrip comic_strip = new ComicStrip { comicman = comicman };
+
+            comic_strips.Add(comic_strip);
+
+            return comic_strip;
+        }
+
+        public bool next_strip() {
+            if (current_comic_strip >= 0) {
+                comic_strips[current_comic_strip].hide_panels();
+            }
+
+            current_comic_strip++;
+
+            if (current_comic_strip >= comic_strips.Count) {
+                return false;
+            }
+
+            comic_strips[current_comic_strip].show_panels();
+
+            return true;
+        }
+    }
+
+    public ComicSequence create_comic_sequence() {
+        ComicSequence comic_sequence = new ComicSequence { comicman = this };
+
+        current_comic_sequence = comic_sequence;
+
+        return comic_sequence;
+    }
+
+    public class ComicStrip {
+        // has multiple panels
+        public List<ComicPanel> comic_panels { get; set; }
+        public ComicMan comicman { get; set; }
+
+        public ComicStrip initialize() {
+            comic_panels = new List<ComicPanel>();
+
+            return this;
+        }
+
+        public ComicPanel create_comic_panel(float x, float y, float z, float width, float height) {
+            ComicPanel new_panel = new ComicPanel {
+                x = x, y = y, z = z, width = width, height = height,
+                default_comic_panel = comicman.default_comic_panel, comicman = comicman
+            };
+
+            new_panel.initialize();
+
+            if (comic_panels == null) {
+                comic_panels = new List<ComicPanel>();
+            }
+
+            z = z - 0.7f;
+
+            comicman.DrawLine(new Vector3(x, y, z), new Vector3(x + width, y, z), Color.gray, new_panel.panel);
+            comicman.DrawLine(new Vector3(x + width, y, z), new Vector3(x + width, y - height, z), Color.gray, new_panel.panel);
+            comicman.DrawLine(new Vector3(x + width, y - height, z), new Vector3(x, y - height, z), Color.gray, new_panel.panel);
+            comicman.DrawLine(new Vector3(x, y - height, z), new Vector3(x, y, z), Color.gray, new_panel.panel);
+
+            comic_panels.Add(new_panel);
+            return new_panel;
+        }
+
+        public void show_panels() {
+            foreach (ComicPanel panel in comic_panels) {
+                panel.panel.SetActive(true);
+            }
+        }
+
+        public void hide_panels() {
+            foreach (ComicPanel panel in comic_panels) {
+                panel.panel.SetActive(false);
+            }
+        }
+    }
 
     public class ComicPanel {
         public float x { get; set; }
@@ -30,6 +133,8 @@ public class ComicMan : MonoBehaviour {
             background.transform.localPosition = new Vector3(0 + (width / 2), 0 - (height / 2), -0.66F);
 
             characters = new List<GameObject>();
+
+            panel.SetActive(false);
         }
 
         // attaches image of character x with emotion y, i.e. son_rise.jpg, dad_serious.jpg
@@ -56,25 +161,6 @@ public class ComicMan : MonoBehaviour {
                 this, text
             );
         }
-    }
-
-    public ComicPanel create_comic_panel(float x, float y, float z, float width, float height) {
-        ComicPanel new_panel = new ComicPanel { x = x, y = y, z = z, width = width, height = height, default_comic_panel = default_comic_panel, comicman = this };
-        new_panel.initialize();
-
-        if (comic_panels == null) {
-            comic_panels = new List<ComicPanel>();
-        }
-
-        z = z - 0.7f;
-
-        DrawLine(new Vector3(x, y, z), new Vector3(x + width, y, z), Color.gray, new_panel.panel);
-        DrawLine(new Vector3(x + width, y, z), new Vector3(x + width, y - height, z), Color.gray, new_panel.panel);
-        DrawLine(new Vector3(x + width, y - height, z), new Vector3(x, y - height, z), Color.gray, new_panel.panel);
-        DrawLine(new Vector3(x, y - height, z), new Vector3(x, y, z), Color.gray, new_panel.panel);
-
-        comic_panels.Add(new_panel);
-        return new_panel;
     }
 
     GameObject create_speech_bubble(Vector3 speech_position, Vector3 character_position, ComicPanel panel, string text) {
