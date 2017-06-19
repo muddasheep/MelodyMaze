@@ -7,7 +7,16 @@ public class ComicMan : MonoBehaviour {
     public GameObject default_comic_panel;
     public GameObject comic_bubble_text;
 
+    ComicSequences comicsequences;
     ComicSequence current_comic_sequence;
+
+    public void display_comic_sequence_for_level(int level_number) {
+        if (comicsequences == null) {
+            comicsequences = new ComicSequences { comicman = this };
+        }
+
+        comicsequences.display_comic_sequence_for_level(level_number);
+    }
 
     public void start_sequence() {
         current_comic_sequence.next_strip();
@@ -15,6 +24,10 @@ public class ComicMan : MonoBehaviour {
 
     public bool next_strip() {
         return current_comic_sequence.next_strip();
+    }
+
+    public void previous_strip() {
+        current_comic_sequence.previous_strip();
     }
 
     public class ComicSequence {
@@ -53,6 +66,18 @@ public class ComicMan : MonoBehaviour {
             comic_strips[current_comic_strip].show_panels();
 
             return true;
+        }
+
+        public void previous_strip() {
+            comic_strips[current_comic_strip].hide_panels();
+
+            current_comic_strip--;
+
+            if (current_comic_strip < 0) {
+                current_comic_strip = 0;
+            }
+
+            comic_strips[current_comic_strip].show_panels();
         }
     }
 
