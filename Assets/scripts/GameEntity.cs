@@ -190,7 +190,7 @@ public class GameEntity : MonoBehaviour {
         play_maze_field_note_at_maze_field(mazeman.base_note_field_script);
 
         reset_camera();
-        start_comic_sequence();
+        //start_comic_sequence();
     }
 
     public void start_random_game() {
